@@ -20,54 +20,39 @@ from google.appengine.ext.webapp import util
 from google.appengine.ext import db  
 from django.utils import simplejson
 
-import room
 import logging
+import models
 
-#class Room(db.Model):   
-    #name = db.StringProperty(required=True)   
-    #location = db.GeoPtProperty(required=True)
-    #long = db.FloatProperty(required=True)
-    #lat  = db.FloatProperty(required=True)
-
-    #Using user_key_valu 
-    #user_id = db.IntegerProperty(required=True)   
-    
 
 class MainHandler(webapp.RequestHandler):
     def get(self):
         
         self.response.out.write('Hello World!')
 
-class Get_room(webapp.RequestHandler):
+class Get_spot(webapp.RequestHandler):
     def get(self): 
         
         logging.debug('[GET]Start recieve HTTP request')
         #Get Data from HTTP request
 
         #logging.debug(self.request)
-        room_long = float(self.request.get('longitude', default_value='0'))
-        room_lat  = float(self.request.get('latitude', default_value='0'))
+        spot_lon  = float(self.request.get('lon', default_value='0'))
+        spot_lat  = float(self.request.get('lat', default_value='0'))
         
-        my_room = models.Room.query(lat=room_lat, 
-                                    lon=room_lon, 
+        print spot_lon
+        print spot_lat
+
+        my_spots = models.Spot.query(lat=spot_lat, 
+                                    lon=spot_lon, 
                                     max_results=2, min_params=(2,0))
-
-
-        '''       
-        params = self.request.arguments()
-        for p in params:
-            self.response.out.write(self.request.get(p))
-            #logging.debug(p)
-            #logging.debug(self.request.get(p))
-
-        '''
-        print room_long
-        print room_lat
+        print my_spots
+        for distance, store in my_spots:
+            self.response.out.write(store.name)
 
         '''
         logging.debug('[GET]Query GAE DB')
         #Query DB
-        data = db.GqlQuery('WHERE ', room_long, room_lat)
+        data = db.GqlQuery('WHERE ', spot_long, spot_lat)
 
         logging.debug('[GET]Transfer to JSON GAE DB')
         #Return JSON object
@@ -92,17 +77,17 @@ class Get_room(webapp.RequestHandler):
        
         logging.debug(self.request)
 
-        room_long = self.request.get('longitude')
-        room_lat = self.request.get('latitude')
+        spot_long = self.request.get('longitude')
+        spot_lat = self.request.get('latitude')
        
-        logging.debug("test1" + str(room_long))
-        logging.debug("test1" + str(room_lat))
+        logging.debug("test1" + str(spot_long))
+        logging.debug("test1" + str(spot_lat))
         
         logging.debug('[POST]Query GAE DB')
         
         '''
         #Query DB
-        data = db.GqlQuery('WHERE ', room_long, room_lat)
+        data = db.GqlQuery('WHERE ', spot_long, spot_lat)
 
         logging.debug('[POST]Transfer to JSON GAE DB')
         #Return JSON object
@@ -111,41 +96,57 @@ class Get_room(webapp.RequestHandler):
         
         self.response.out.write(output)
         ''' 
-class Record_room(webapp.RequestHandler): 
+class Record_spot(webapp.RequestHandler): 
     def get(self):
      
-        #Write data into DB
-        #room_obj = room.Room()
-        #room_obj.name = 'Edward'
-        #room_obj.location = db.GeoPt(lat=25, lon=121)
-        room_obj = room.Room()
-        room_obj.name = 'Edward'
-        room_obj.location = db.GeoPt(lat=25.00058364868164, lon=121.5192642211914)
-        room_obj.put()
+        name = self.request.get('name')
+        logging.info(name)
+        description = self.request.get('description')
+        lat = float(self.request.get('lat'))
+        lon = float(self.request.get('lon'))
+        
+        print name
+        print description
+        print lat
+        print lon
+
+
+        new_spot = models.Spot.add(name=name,lat=lat, lon=lon, description=description)
+        self.response.out.write('done')
+
         '''
-        r_key = room_obj.key()
-        #print room_obj.name
-        #print room_obj.location
+        spot_obj = spot.Spot()
+        spot_obj.name = 'Edward'
+        spot_obj.location = db.GeoPt(lat=25.00058364868164, lon=121.5192642211914)
+        spot_obj.put()
+        
+        r_key = spot_obj.key()
+        #print spot_obj.name
+        #print spot_obj.location
         r = db.get(r_key)
         print r.name
         print r.location
         '''
 
-class Query_room(webapp.RequestHandler): 
+
+
+class Query_spot(webapp.RequestHandler): 
     def get(self):
          
-        query = db.Query(room.Room)  
-        #query = Room.all()
+        query = db.Query(models.Spot)  
+        #query = Spot.all()
         
         for msg in query:
             self.response.out.write('<b>%s</b> wrote:<br>' % msg.name)
+            self.response.out.write('<b>%s</b> wrote:<br>' % msg.description)
+            self.response.out.write('<b>%s</b> wrote:<br>' % msg.geoboxes)
             self.response.out.write('<b>%s</b> wrote:<br>' % msg.location)
  
 def main():
     sitemap=[('/',MainHandler),
-             ('/room',Record_room),   
-             ('/q-room',Query_room),   
-             ('/get-room-list',Get_room)]
+             ('/spot',Record_spot),   
+             ('/q-spot',Query_spot),   
+             ('/get-spot-list',Get_spot)]
     
     application = webapp.WSGIApplication(sitemap,debug=True)
 
