@@ -12,7 +12,6 @@ locationWindow.add(searchBar);
 
 
 
-/*
 locationWindow.addEventListener('open', function()
 {
     Ti.API.log('open event');
@@ -55,13 +54,80 @@ locationWindow.addEventListener('open', function()
             return;
         }
 
-        var longitude = e.coords.longitude;
-        var latitude  = e.coords.latitude;
-        var accuracy  = e.coords.accuracy;
+        var lon = e.coords.longitude;
+        var lat = e.coords.latitude;
+        var accuracy = e.coords.accuracy;
 
-        Ti.API.info('long:' + longitude + ' lat:' + latitude + ' accuracy:' + accuracy);
-    });
+        Ti.API.info('long:' + lon + ' lat:' + lat + ' accuracy:' + accuracy);
+
+        var data = {"lat":25.040846, "lon":121.525396, "accuracy":80};
+        var body = JSON.stringify(data);
+
+        var client = Ti.Network.createHTTPClient();
+
+        //var url = 'http://lets-talky-talky.appspot.com/get-room-list';
+        var url = 'http://127.0.0.1:8084/get-spot-list';
+        client.open('GET', url, true);
+        client.setRequestHeader("Content-type", "application/json");
+        client.setRequestHeader("Content-length", body.length);
+        //client.setRequestHeader("Connection", "close");
+
+        client.onreadystatechange = function() {
+            
+            //Ti.API.info("onreadystatechange = " + client.readyState + " status = " + client.status);
+            
+            if (client.readyState==4 && client.status == 200)
+            {
+                Ti.API.info("Got Response1:" + client.responseText);
+                
+                var r = JSON.parse(client.responseText);
+                Ti.API.info('resp = ' + r);
+                
+                var response = nil;
+                try
+                {
+                    Ti.API.info('1');
+                    response = JSON.parse(client.responseText);
+                }
+                catch (e)
+                {
+                    Ti.API.info('2');
+                    response = client.responseText;
+                }
+                
+                Ti.API.info('Got Response:' + response);
+            }
+        };
+
+        client.send(body);
+    });// Ti.Geolocation.getCurrentPosition(function(e)
+
+
 });
-*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
