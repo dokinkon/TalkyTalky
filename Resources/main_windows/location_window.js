@@ -1,4 +1,6 @@
 
+Ti.Geolocation.purpose = 'LBS'
+
 var locationWindow = Ti.UI.currentWindow;
 
 var searchBar = Ti.UI.createSearchBar({
@@ -70,32 +72,18 @@ locationWindow.addEventListener('open', function()
         client.open('GET', url, true);
         client.setRequestHeader("Content-type", "application/json");
         client.setRequestHeader("Content-length", body.length);
-        //client.setRequestHeader("Connection", "close");
 
         client.onreadystatechange = function() {
             
-            //Ti.API.info("onreadystatechange = " + client.readyState + " status = " + client.status);
-            
             if (client.readyState==4 && client.status == 200)
             {
-                Ti.API.info("Got Response1:" + client.responseText);
-                
-                var r = JSON.parse(client.responseText);
-                Ti.API.info('resp = ' + r);
-                
-                var response = nil;
-                try
-                {
-                    Ti.API.info('1');
-                    response = JSON.parse(client.responseText);
-                }
-                catch (e)
-                {
-                    Ti.API.info('2');
-                    response = client.responseText;
-                }
-                
-                Ti.API.info('Got Response:' + response);
+                Ti.API.info('response = ' + client.responseText);
+                var spot = JSON.parse(client.responseText);
+
+                //Ti.API.info('spot = ', spot);
+                Ti.API.info('name = ' + spot.name);
+                Ti.API.info('latitude = ' + spot.location.lat);
+                Ti.API.info('longitude = ' + spot.location.lon);
             }
         };
 

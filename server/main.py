@@ -55,8 +55,18 @@ class Get_spot(webapp.RequestHandler):
         logging.info('Receive GetSpot Request. lon = %s, lat = %s', lon, lat)
         
         spots = models.Spot.query(lat=lat, lon=lon, max_results=2, min_params=(2,0))
+        spotInfo = spots[0]
+        distance = spotInfo[0]
+        spot = spotInfo[1]
+        
+        logging.info('spot = %s', spot)
+        logging.info('distance = %s', distance)
+        
 
-        data = json.encode(spots)
+        data = json.encode(spot)
+
+        logging.info('encoded data = %s', data)
+        
         self.response.headers['Content-Type'] = 'application/json; charset=utf-8'
         self.response.out.write(data)
 
