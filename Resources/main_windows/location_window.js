@@ -3,6 +3,7 @@ Ti.include('../talky.js')
 
 Ti.Geolocation.purpose = 'LBS'
 
+
 var locationWindow = Ti.UI.currentWindow;
 
 Ti.App.addEventListener('querySpotName', function(){
@@ -19,7 +20,7 @@ var spotData = [];
 
 var spotTableView = Ti.UI.createTableView({
 
-    allowsSelection:false,
+    allowsselection:false,
     height:200,
     top:100,
 });
@@ -27,8 +28,15 @@ var spotTableView = Ti.UI.createTableView({
 
 locationWindow.add(spotTableView);
 
+spotTableView.addEventListener('click', function(e) {
 
+    var win = Ti.UI.createWindow({
+        url:'spot-window.js',
+        title:e.rowData.title,
+    });
 
+    Ti.UI.currentTab.open(win, {animated:true});
+});
 
 
 
@@ -60,15 +68,21 @@ var onSpotsAvailable = function(spots) {
  * A callback when location from mobile device is avalible
  *
  * Arg:
- *  loc.lat // current latitude
- *  loc.lon // current longitude
- *  loc.accuracy // 
  *
  */
-var onLocationAvailable = function(loc) {
+var onLocationAvailable = function(e) {
+
+    if (!e.success || e.error)
+    {
+        alert('error ' + JSON.stringify(e.error));
+        return;
+    }
+
+    Ti.API.info("location available:" + e.coords.latitude + ", " + e.coords.longitude);
 
     // Just use a fix location for testing
-    var data = {"lat":25.040846, "lon":121.525396, "accuracy":80};
+    //var data = {"lat":25.040846, "lon":121.525396, "accuracy":80};
+    var data = {"lat":e.coords.latitude, "lon":e.coords.longitude, "accuracy":e.coords.accuracy};
     var body = JSON.stringify(data);
 
     var client = Ti.Network.createHTTPClient();
@@ -97,6 +111,7 @@ var onLocationAvailable = function(loc) {
 }
 
 
+Ti.Geolocation.addEventListener('location', onLocationAvailable);
 
 
 
@@ -159,19 +174,7 @@ locationWindow.addEventListener('open', function()
 
     Ti.Geolocation.accuracy = Ti.Geolocation.ACCURACY_BEST;
 
-    Ti.Geolocation.getCurrentPosition(function(e)
-    {
-        if (!e.success || e.error)
-        {
-            alert('error ' + JSON.stringify(e.error));
-            return;
-        }
-
-        onLocationAvailable({lon:e.coords.longitude, lat:e.coords.latitude, accuracy:e.coords.accuracy});
-
-    });// Ti.Geolocation.getCurrentPosition(function(e)
-
-
+    Ti.Geolocation.getCurrentPosition(onLocationAvailable);
 });
 
 

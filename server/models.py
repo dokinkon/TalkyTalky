@@ -28,7 +28,7 @@ class Spot(db.Model):
   description = db.TextProperty()
   location = db.GeoPtProperty()
   geoboxes = db.StringListProperty()
-  #userPosts = db.ListProperty(db.Key)
+  userPosts = db.ListProperty(db.Key)
 
 
 

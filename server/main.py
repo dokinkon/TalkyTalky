@@ -14,6 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
+
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import util
 
@@ -34,6 +36,39 @@ class MainHandler(webapp.RequestHandler):
     def get(self):
         
         self.response.out.write('Hello World!')
+
+
+class GetPostHandler(webapp.RequestHandler):
+
+    """
+
+    Handle GetPostRequest, return posts in some spot.
+
+    """
+
+    def get(self):
+        self.impl()
+
+    def post(self):
+        logging.info('WARNING: calling post in GetPostHandler (Maybe a bug from Titanium)')
+        self.impl()
+
+    def impl(self):
+
+        logging.info('GetPostHandler...')
+
+        request = simplejson.loads(self.request.body)
+        
+        spotName = request['spot-name']
+
+        query = db.Query(userpost.UserPost)
+
+        query.filter('spotName = ', spotName)
+
+        results = query.fetch(limit=10)
+
+        self.response.headers['Content-Type'] = 'application/json; charset=utf-8'
+        self.response.out.write(json.encode(results))
 
 
 class CreatePostHandler(webapp.RequestHandler):
@@ -64,7 +99,7 @@ class CreatePostHandler(webapp.RequestHandler):
 
 
         # create a UserPost object
-        userPost = userpost.UserPost()
+        userPost = userpost.UserPost(spotName=spotName)
         userPost.content = content
         key = userPost.put()
 
@@ -182,39 +217,28 @@ class Record_spot(webapp.RequestHandler):
 
     """
     25.040846 121.525396
+
+    
     127.0.0.1:8084/spot?name=department-store&description=description&lat=25.040846&lon=121.525396
+    127.0.0.1:8084/spot?name=rent-place&description=description&lat=25.000197&lon=121.520215
+
     """
     def get(self):
      
-        name = self.request.get('name')
+        name = unicode(self.request.get('name'))
+
         logging.info(name)
         description = self.request.get('description')
         lat = float(self.request.get('lat'))
         lon = float(self.request.get('lon'))
         
-        print name
+        print name.encode('utf-8')
         print description
         print lat
         print lon
 
-
         new_spot = models.Spot.add(name=name,lat=lat, lon=lon, description=description)
         self.response.out.write('done')
-
-        '''
-        spot_obj = spot.Spot()
-        spot_obj.name = 'Edward'
-        spot_obj.location = db.GeoPt(lat=25.00058364868164, lon=121.5192642211914)
-        spot_obj.put()
-        
-        r_key = spot_obj.key()
-        #print spot_obj.name
-        #print spot_obj.location
-        r = db.get(r_key)
-        print r.name
-        print r.location
-        '''
-
 
 
 class Query_spot(webapp.RequestHandler): 
@@ -235,7 +259,8 @@ def main():
              ('/q-spot',Query_spot),   
              ('/get-spot-list',Get_spot),
              ('/create-spot', CreateSpotHandler),
-             ('/create-post', CreatePostHandler)]
+             ('/create-post', CreatePostHandler),
+             ('/get-post-list', GetPostHandler)]
     
     application = webapp.WSGIApplication(sitemap,debug=True)
 
