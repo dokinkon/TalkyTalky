@@ -4,6 +4,7 @@ from google.appengine.ext import db
 #from google.appengine.ext.db import djangoforms
 
 import geobox
+import userpost
 
 RADIUS = 6378100
 
@@ -27,6 +28,9 @@ class Spot(db.Model):
   description = db.TextProperty()
   location = db.GeoPtProperty()
   geoboxes = db.StringListProperty()
+  #userPosts = db.ListProperty(db.Key)
+
+
 
   @classmethod
   def add(self, **kwargs):

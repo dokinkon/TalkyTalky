@@ -39,7 +39,10 @@ class GqlEncoder(simplejson.JSONEncoder):
 
                 if isinstance(value, db.GeoPt):
                     output[key] = {'lat':value.lat, 'lon':value.lon}
-
+                elif isinstance(value, db.Key):
+                    output[key] = ""
+                elif isinstance(value, db.ListProperty):
+                    output[key] = "ListProperty"
                 else:
                     output[key] = value;
 

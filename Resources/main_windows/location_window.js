@@ -1,7 +1,106 @@
 
+Ti.include('../talky.js')
+
 Ti.Geolocation.purpose = 'LBS'
 
 var locationWindow = Ti.UI.currentWindow;
+
+Ti.App.addEventListener('querySpotName', function(){
+    Ti.App.fireEvent('spotChanged', {spotName:Talky.spotName});
+});
+
+
+var spotData = [];
+
+/**
+ * Create a tableView to contain spots
+ *
+ */
+
+var spotTableView = Ti.UI.createTableView({
+
+    allowsSelection:false,
+    height:200,
+    top:100,
+});
+
+
+locationWindow.add(spotTableView);
+
+
+
+
+
+
+/***
+ * A callback when spots available
+ *
+ * add spot name as tableItem
+ *
+ * Arg:
+ *   spots: a list contains spots
+ *
+ *
+ */
+var onSpotsAvailable = function(spots) {
+
+    Ti.API.info("LocationWindow::onSpotAvailable");
+
+    for (var i=0;i<spots.length;i+=1){
+        spotData[i] = {title:spots[i].name, hasChild:true};
+    }
+
+    spotTableView.setData(spotData);
+};
+
+
+
+
+/**
+ * A callback when location from mobile device is avalible
+ *
+ * Arg:
+ *  loc.lat // current latitude
+ *  loc.lon // current longitude
+ *  loc.accuracy // 
+ *
+ */
+var onLocationAvailable = function(loc) {
+
+    // Just use a fix location for testing
+    var data = {"lat":25.040846, "lon":121.525396, "accuracy":80};
+    var body = JSON.stringify(data);
+
+    var client = Ti.Network.createHTTPClient();
+
+    client.open('GET', Talky.getSpotURL, true);
+    client.setRequestHeader("Content-type", "application/json");
+    client.setRequestHeader("Content-length", body.length);
+
+    client.onreadystatechange = function() {
+
+        if (client.readyState==4 && client.status == 200)
+        {
+            Ti.API.info('response = ' + client.responseText);
+            var spotList = JSON.parse(client.responseText);
+
+            for (var i=0;i<spotList.length;i+=1)
+            {
+                Ti.API.info("spotName = " + spotList[i].name);
+            }
+
+            onSpotsAvailable(spotList);
+        }
+    };
+
+    client.send(body);
+}
+
+
+
+
+
+
 
 var searchBar = Ti.UI.createSearchBar({
 	barColor:'#000',
@@ -11,6 +110,18 @@ var searchBar = Ti.UI.createSearchBar({
 });
 
 locationWindow.add(searchBar);
+
+var relocationButtion = Ti.UI.createButton({
+    title:'重新定位',
+    top:300,
+    width:100,
+    left:30
+});
+
+locationWindow.add(relocationButtion);
+
+
+relocationButtion.addEventListener('click', function(){})
 
 
 
@@ -56,38 +167,8 @@ locationWindow.addEventListener('open', function()
             return;
         }
 
-        var lon = e.coords.longitude;
-        var lat = e.coords.latitude;
-        var accuracy = e.coords.accuracy;
+        onLocationAvailable({lon:e.coords.longitude, lat:e.coords.latitude, accuracy:e.coords.accuracy});
 
-        Ti.API.info('long:' + lon + ' lat:' + lat + ' accuracy:' + accuracy);
-
-        var data = {"lat":25.040846, "lon":121.525396, "accuracy":80};
-        var body = JSON.stringify(data);
-
-        var client = Ti.Network.createHTTPClient();
-
-        //var url = 'http://lets-talky-talky.appspot.com/get-room-list';
-        var url = 'http://127.0.0.1:8084/get-spot-list';
-        client.open('GET', url, true);
-        client.setRequestHeader("Content-type", "application/json");
-        client.setRequestHeader("Content-length", body.length);
-
-        client.onreadystatechange = function() {
-            
-            if (client.readyState==4 && client.status == 200)
-            {
-                Ti.API.info('response = ' + client.responseText);
-                var spot = JSON.parse(client.responseText);
-
-                //Ti.API.info('spot = ', spot);
-                Ti.API.info('name = ' + spot.name);
-                Ti.API.info('latitude = ' + spot.location.lat);
-                Ti.API.info('longitude = ' + spot.location.lon);
-            }
-        };
-
-        client.send(body);
     });// Ti.Geolocation.getCurrentPosition(function(e)
 
 

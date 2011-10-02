@@ -22,6 +22,7 @@ from django.utils import simplejson
 
 import logging
 import models
+import userpost
 import json
 
 from django.utils import simplejson
@@ -33,6 +34,49 @@ class MainHandler(webapp.RequestHandler):
     def get(self):
         
         self.response.out.write('Hello World!')
+
+
+class CreatePostHandler(webapp.RequestHandler):
+    """
+    Handle User post actions
+    """
+
+    def post(self):
+
+        postDict = simplejson.loads(self.request.body)
+
+        logging.info('Handling UserPost Request...')
+        
+        spotName = postDict['spotName']
+        content  = postDict['content']
+
+        logging.info('spotName = %s', spotName)
+        logging.info('content  = %s', content)
+
+
+        # Find Spot Model by name
+        spotQuery = db.Query(models.Spot)
+        #spotQuery.filter("name =", "department-store")
+
+        result = spotQuery.fetch(limit=1)
+
+        logging.info('result = %s', result)
+
+
+        # create a UserPost object
+        userPost = userpost.UserPost()
+        userPost.content = content
+        key = userPost.put()
+
+        spot = result[0]
+        spot.userPosts.append(key)
+        spot.put()
+
+        response = {'result':True}
+        
+        self.response.headers['Content-Type'] = 'application/json; charset=utf-8'
+        self.response.out.write(simplejson.dumps(response))
+
 
 class Get_spot(webapp.RequestHandler):
 
@@ -55,6 +99,16 @@ class Get_spot(webapp.RequestHandler):
         logging.info('Receive GetSpot Request. lon = %s, lat = %s', lon, lat)
         
         spots = models.Spot.query(lat=lat, lon=lon, max_results=2, min_params=(2,0))
+
+        spotList = [];
+
+        for distance, spot in spots:
+            spotList.append({'name':spot.name})
+
+
+
+
+        """
         spotInfo = spots[0]
         distance = spotInfo[0]
         spot = spotInfo[1]
@@ -66,9 +120,11 @@ class Get_spot(webapp.RequestHandler):
         data = json.encode(spot)
 
         logging.info('encoded data = %s', data)
+        """
         
         self.response.headers['Content-Type'] = 'application/json; charset=utf-8'
-        self.response.out.write(data)
+        #self.response.out.write(data)
+        self.response.out.write(simplejson.dumps(spotList))
 
     def get(self): 
 
@@ -126,7 +182,7 @@ class Record_spot(webapp.RequestHandler):
 
     """
     25.040846 121.525396
-    127.0.0.1:8084/spot?name="department-store"&description="description"&lat=25.040846&lon=121.525396
+    127.0.0.1:8084/spot?name=department-store&description=description&lat=25.040846&lon=121.525396
     """
     def get(self):
      
@@ -178,7 +234,8 @@ def main():
              ('/spot',Record_spot),   
              ('/q-spot',Query_spot),   
              ('/get-spot-list',Get_spot),
-             ('/create-spot', CreateSpotHandler)]
+             ('/create-spot', CreateSpotHandler),
+             ('/create-post', CreatePostHandler)]
     
     application = webapp.WSGIApplication(sitemap,debug=True)
 

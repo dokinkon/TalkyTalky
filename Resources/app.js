@@ -20,10 +20,17 @@ Talky.locationWindow = Titanium.UI.createWindow({
 
 
 
-var tab1 = Titanium.UI.createTab({  
+var locationTab = Titanium.UI.createTab({  
     icon:'location.png',
     window:Talky.locationWindow
 });
+
+
+locationTab.addEventListener('click', function(e){
+    Ti.API.info("LocationTab Pressed");
+});
+
+
 
 
 
@@ -62,13 +69,16 @@ var messageNotificationTab = Ti.UI.createTab({
 //
 //  add tabs
 //
-tabGroup.addTab(tab1);  
+tabGroup.addTab(locationTab);  
 tabGroup.addTab(tab2);  
 tabGroup.addTab(shareHandsomeTab);  
 tabGroup.addTab(messageNotificationTab);  
 
 tabGroup.addEventListener('focus', function(e){
-    Ti.API.info('index = ' + e.index);
+    Ti.API.info('tabIndex = ' + e.index);
+
+    //if (e.index===Talky.locationTabIndex)
+
 });
 
 
