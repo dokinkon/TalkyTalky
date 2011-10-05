@@ -10,6 +10,22 @@ Titanium.UI.setBackgroundColor('#000');
 var tabGroup = Titanium.UI.createTabGroup();
 
 
+
+// create main window
+var mainWindow = Ti.UI.createWindow({
+    url:'main_windows/main_window.js',
+    title:'Main',
+    backgroundColor:'#fff'
+});
+
+
+var mainTab = Ti.UI.createTab({
+    window:mainWindow
+});
+
+
+
+
 // create locationWindow
 
 Talky.locationWindow = Titanium.UI.createWindow({  
@@ -69,16 +85,15 @@ var messageNotificationTab = Ti.UI.createTab({
 //
 //  add tabs
 //
+tabGroup.addTab(mainTab);
 tabGroup.addTab(locationTab);  
 tabGroup.addTab(tab2);  
 tabGroup.addTab(shareHandsomeTab);  
 tabGroup.addTab(messageNotificationTab);  
 
 tabGroup.addEventListener('focus', function(e){
-    Ti.API.info('tabIndex = ' + e.index);
-
+    //Ti.API.info('tabIndex = ' + e.index);
     //if (e.index===Talky.locationTabIndex)
-
 });
 
 

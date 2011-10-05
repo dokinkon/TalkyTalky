@@ -91,7 +91,7 @@ class CreatePostHandler(webapp.RequestHandler):
 
         # Find Spot Model by name
         spotQuery = db.Query(models.Spot)
-        #spotQuery.filter("name =", "department-store")
+        spotQuery.filter("name =", spotName)
 
         result = spotQuery.fetch(limit=1)
 

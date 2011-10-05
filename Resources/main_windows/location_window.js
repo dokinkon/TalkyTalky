@@ -142,7 +142,7 @@ relocationButtion.addEventListener('click', function(){})
 
 locationWindow.addEventListener('open', function()
 {
-    Ti.API.log('open event');
+    //Ti.API.log('open event');
     // query current position from device...
 
     if (Ti.Geolocation.locationServicesEnabled == false)
