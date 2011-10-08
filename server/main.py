@@ -67,13 +67,19 @@ class GetPostHandler(webapp.RequestHandler):
 
         results = query.fetch(limit=10)
 
-        self.response.headers['Content-Type'] = 'application/json; charset=utf-8'
-        self.response.out.write(json.encode(results))
+        posts = []
 
+        for result in results:
+            posts.append({'userId':result.userId, 'content':result.content})
+            
+        self.response.headers['Content-Type'] = 'application/json; charset=utf-8'
+        self.response.out.write(simplejson.dumps(posts))
 
 class CreatePostHandler(webapp.RequestHandler):
     """
     Handle User post actions
+
+    TODO : error handling
     """
 
     def post(self):
@@ -82,9 +88,11 @@ class CreatePostHandler(webapp.RequestHandler):
 
         logging.info('Handling UserPost Request...')
         
+        userId   = postDict['userId']
         spotName = postDict['spotName']
         content  = postDict['content']
 
+        logging.info('userId = %s', userId)
         logging.info('spotName = %s', spotName)
         logging.info('content  = %s', content)
 
@@ -99,7 +107,7 @@ class CreatePostHandler(webapp.RequestHandler):
 
 
         # create a UserPost object
-        userPost = userpost.UserPost(spotName=spotName)
+        userPost = userpost.UserPost(userId=userId, spotName=spotName)
         userPost.content = content
         key = userPost.put()
 
@@ -140,25 +148,8 @@ class Get_spot(webapp.RequestHandler):
         for distance, spot in spots:
             spotList.append({'name':spot.name})
 
-
-
-
-        """
-        spotInfo = spots[0]
-        distance = spotInfo[0]
-        spot = spotInfo[1]
-        
-        logging.info('spot = %s', spot)
-        logging.info('distance = %s', distance)
-        
-
-        data = json.encode(spot)
-
-        logging.info('encoded data = %s', data)
-        """
         
         self.response.headers['Content-Type'] = 'application/json; charset=utf-8'
-        #self.response.out.write(data)
         self.response.out.write(simplejson.dumps(spotList))
 
     def get(self): 

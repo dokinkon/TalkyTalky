@@ -62,7 +62,7 @@ shareButton.addEventListener('click', function(){
     var client = Ti.Network.createHTTPClient();
 
     //var data = {"spotName":Talky.spotName, "content":textArea.value};
-    var data = {"spotName":currentWindow.title, "content":textArea.value};
+    var data = {"userId":Ti.Facebook.uid,"spotName":currentWindow.title, "content":textArea.value};
     var body = JSON.stringify(data);
 
     client.open('POST', Talky.createPostURL, true);
@@ -92,7 +92,84 @@ var postTableView = Ti.UI.createTableView({
 
 currentWindow.add(postTableView);
 
-var requestPosts = function(){
+
+
+/**
+ * Create a tableViewRow by current post, return a tableViewRow Instance.
+ */
+var createTableViewRow = function(post) {
+
+    Ti.API.info("Here2");
+    var tvRow = Ti.UI.createTableViewRow({
+        height:'auto',
+        backgroundColor:'#fff'
+    });
+
+
+    var uid = post.userId;
+    Ti.API.info("createTableViewRow, uid = " + uid);
+    var query = "SELECT pic_square FROM user ";
+    query += "WHERE uid = " + uid;
+
+    Ti.Facebook.request('fql.query', {query:query}, function(r){
+        if (!r.success) {
+            if (r.error) {
+                alert(r.error);
+            } else {
+                alert('call was unsuccessful.');
+            }
+
+            return;
+        }
+
+        var results = JSON.parse(r.result);
+        var result = results[0];
+
+        var imageView = Ti.UI.createImageView({
+            image:result.pic_square === null ? '../images/user.png' : result.pic_square,
+            left:10,
+            width:50,
+            height:50
+        });
+
+        tvRow.add(imageView);
+
+    }); // End of FB query
+
+    var textArea = Ti.UI.createTextArea({
+        value:post.content,
+        left:60,
+        height:50,
+    });
+
+    tvRow.add(textArea);
+    return tvRow;
+}
+
+
+/**
+ * input: posts
+ *
+ */
+var onPostsAvailable = function(posts) {
+
+    Ti.API.info('onPostsAvailable');
+    Ti.API.info('posts length = ' + posts.length);
+
+    var rows = [];
+
+    for (var i=0;i<posts.length;i+=1) {
+        Ti.API.info("Here1");
+        rows[i] = createTableViewRow(posts[i]);
+    }
+
+    postTableView.setData(rows, { animationStyle:Ti.UI.iPhone.RowAnimationStyle.DOWN });
+}
+
+
+
+
+var requestPosts = function() {
 
     var client = Ti.Network.createHTTPClient();
 
@@ -107,16 +184,9 @@ var requestPosts = function(){
         
         if (client.readyState==4 && client.status == 200)
         {
-            Ti.API.info('response = ' + client.responseText);
-            var results = JSON.parse(client.responseText);
-            var posts = []
-            
-            for (var i=0;i<results.length;i+=1) {
-                posts[i] = {title:results[i].content, hasChild:false};
-            }
-
-            postTableView.setData(posts);
-
+            Ti.API.info('requestPosts:response = ' + client.responseText);
+            var posts = JSON.parse(client.responseText);
+            onPostsAvailable(posts);
         }
     };
 
