@@ -8,6 +8,14 @@ Ti.Facebook.permissions = ['publish_stream', 'read_stream'];
 
 var currentWindow = Ti.UI.currentWindow;
 
+var fbButton = Ti.Facebook.createLoginButton({
+	'style':'wide',
+	bottom:10
+});
+
+currentWindow.add(fbButton);
+
+
 
 // 1. check network connection status.
 // 2. request user login to FB

@@ -2,12 +2,14 @@
 Ti.include('talky.js');
 
 
+
+
 // this sets the background color of the master UIView (when there are no windows/tab groups on it)
-Titanium.UI.setBackgroundColor('#000');
+Ti.UI.setBackgroundColor('#000');
 
 
 // create tab group
-var tabGroup = Titanium.UI.createTabGroup();
+var tabGroup = Ti.UI.createTabGroup();
 
 
 
@@ -20,6 +22,7 @@ var mainWindow = Ti.UI.createWindow({
 
 
 var mainTab = Ti.UI.createTab({
+    title:'首頁',
     window:mainWindow
 });
 
@@ -37,7 +40,8 @@ Talky.locationWindow = Titanium.UI.createWindow({
 
 
 var locationTab = Titanium.UI.createTab({  
-    icon:'location.png',
+    icon:'icons/location.png',
+    title:'定位',
     window:Talky.locationWindow
 });
 
@@ -59,6 +63,7 @@ Talky.shareBeautyWindow = Titanium.UI.createWindow({
 
 var tab2 = Titanium.UI.createTab({  
     icon:'sharing-beauty.png',
+    title:'分享正妹',
     window:Talky.shareBeautyWindow
 });
 

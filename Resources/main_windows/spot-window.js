@@ -6,9 +6,11 @@
  *
  **/
 
-Ti.include('../talky.js')
+Ti.include('../talky.js');
+Ti.include('spot-window-layout.js');
 
 var currentWindow = Ti.UI.currentWindow;
+currentWindow.backgroundColor = '#fff';
 
 
 
@@ -21,34 +23,15 @@ var currentWindow = Ti.UI.currentWindow;
 
 
 
-var textArea = Titanium.UI.createTextArea({
-	editable: true,
-	value:'想說什麼嗎？',
-	height:50,
-	width:200,
-	top:10,
-    left:10,
-	font:{fontSize:20,fontFamily:'Marker Felt', fontWeight:'bold'},
-	color:'#888',
-	textAlign:'left',
-	appearance:Titanium.UI.KEYBOARD_APPEARANCE_ALERT,	
-	keyboardType:Titanium.UI.KEYBOARD_NUMBERS_PUNCTUATION,
-	returnKeyType:Titanium.UI.RETURNKEY_DONE,
-	borderWidth:2,
-	borderColor:'#bbb',
-	borderRadius:5,
-	suppressReturn:false
-});
+var textArea = Titanium.UI.createTextArea(
+    Layout.saySomething
+);
 
 currentWindow.add(textArea);
 
-var shareButton = Ti.UI.createButton({
-    title:"分享",
-    height:50,
-    width:90,
-    top:10,
-    left:220,
-});
+var shareButton = Ti.UI.createButton(
+    Layout.submitButton
+);
 
 currentWindow.add(shareButton);
 
@@ -61,21 +44,21 @@ shareButton.addEventListener('click', function(){
 
     var client = Ti.Network.createHTTPClient();
 
-    //var data = {"spotName":Talky.spotName, "content":textArea.value};
     var data = {"userId":Ti.Facebook.uid,"spotName":currentWindow.title, "content":textArea.value};
     var body = JSON.stringify(data);
 
     client.open('POST', Talky.createPostURL, true);
     client.setRequestHeader("Content-type", "application/json");
-    client.setRequestHeader("Content-length", body.length);
 
-    client.onreadystatechange = function() {
-        
-        if (client.readyState==4 && client.status == 200)
-        {
-            Ti.API.info('response = ' + client.responseText);
-            var result = JSON.parse(client.responseText);
-        }
+    client.onload = function() {
+        Ti.API.info('response = ' + client.responseText);
+        var result = JSON.parse(client.responseText);
+        // TODO: parse result from GAE server
+    };
+
+
+    client.onerror = function(e) {
+        alert(e.error);
     };
 
     client.send(body);
@@ -84,12 +67,7 @@ shareButton.addEventListener('click', function(){
 
 
 
-var postTableView = Ti.UI.createTableView({
-    allowsselection:false,
-    height:240,
-    top:70,
-});
-
+var postTableView = Ti.UI.createTableView(Layout.postTableView);
 currentWindow.add(postTableView);
 
 
@@ -99,7 +77,6 @@ currentWindow.add(postTableView);
  */
 var createTableViewRow = function(post) {
 
-    Ti.API.info("Here2");
     var tvRow = Ti.UI.createTableViewRow({
         height:'auto',
         backgroundColor:'#fff'
@@ -108,7 +85,7 @@ var createTableViewRow = function(post) {
 
     var uid = post.userId;
     Ti.API.info("createTableViewRow, uid = " + uid);
-    var query = "SELECT pic_square FROM user ";
+    var query = "SELECT pic_square, name FROM user ";
     query += "WHERE uid = " + uid;
 
     Ti.Facebook.request('fql.query', {query:query}, function(r){
@@ -125,23 +102,19 @@ var createTableViewRow = function(post) {
         var results = JSON.parse(r.result);
         var result = results[0];
 
-        var imageView = Ti.UI.createImageView({
-            image:result.pic_square === null ? '../images/user.png' : result.pic_square,
-            left:10,
-            width:50,
-            height:50
-        });
+        var imageView = Ti.UI.createImageView(Layout.userPhoto);
+        imageView.image = result.pic_square === null ? '../images/user.png' : result.pic_square;
 
         tvRow.add(imageView);
 
+        var nameLabel = Ti.UI.createLabel(Layout.nameLabel);
+        nameLabel.text = result.name;
+        tvRow.add(nameLabel);
+
     }); // End of FB query
 
-    var textArea = Ti.UI.createTextArea({
-        value:post.content,
-        left:60,
-        height:50,
-    });
-
+    var textArea = Ti.UI.createTextArea(Layout.postContent);
+    textArea.value = post.content;
     tvRow.add(textArea);
     return tvRow;
 }
@@ -159,7 +132,6 @@ var onPostsAvailable = function(posts) {
     var rows = [];
 
     for (var i=0;i<posts.length;i+=1) {
-        Ti.API.info("Here1");
         rows[i] = createTableViewRow(posts[i]);
     }
 
@@ -176,18 +148,19 @@ var requestPosts = function() {
     var data = {"spot-name":currentWindow.title};
     var body = JSON.stringify(data);
 
-    client.open('GET', Talky.getPostsURL, true);
+    client.open('POST', Talky.getPostsURL, true);
     client.setRequestHeader("Content-type", "application/json");
-    client.setRequestHeader("Content-length", body.length);
+    //client.setRequestHeader("Content-length", body.length);
 
-    client.onreadystatechange = function() {
+    client.onload = function() {
         
-        if (client.readyState==4 && client.status == 200)
-        {
-            Ti.API.info('requestPosts:response = ' + client.responseText);
-            var posts = JSON.parse(client.responseText);
-            onPostsAvailable(posts);
-        }
+        Ti.API.info('requestPosts:response = ' + client.responseText);
+        var posts = JSON.parse(client.responseText);
+        onPostsAvailable(posts);
+    };
+
+    client.onerror = function(e) {
+        alert(e.error);
     };
 
     client.send(body);
