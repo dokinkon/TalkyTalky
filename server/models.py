@@ -4,7 +4,7 @@ from google.appengine.ext import db
 #from google.appengine.ext.db import djangoforms
 
 import geobox
-import userpost
+#import userpost
 
 RADIUS = 6378100
 
@@ -24,12 +24,18 @@ def _earth_distance(lat1, lon1, lat2, lon2):
       math.cos(lat1) * math.cos(lat2) * math.cos(lon2 - lon1))
 
 class Spot(db.Model):
-  name = db.StringProperty()
-  description = db.TextProperty()
-  location = db.GeoPtProperty()
-  geoboxes = db.StringListProperty()
-  userPosts = db.ListProperty(db.Key)
+    name = db.StringProperty()
+    description = db.StringProperty()
+    location = db.GeoPtProperty()
+    geoboxes = db.StringListProperty()
 
+    """
+    implicity properties
+    users:<collection of TalkyUser>
+    posts:<collection of UserPost>
+
+    """ 
+    
 
 
   @classmethod
@@ -100,17 +106,6 @@ class Spot(db.Model):
 
     return spots_by_distance
 
-class UserProfile(db.Model):
-  user = db.UserProperty(required=True)
 
-class CommentIndex(db.Model):
-  max_index = db.IntegerProperty(default=0, required=True)
 
-class Comment(db.Model):
-  index = db.IntegerProperty(required=True)
-  reviewer = db.ReferenceProperty(UserProfile, required=True)
-  spot = db.ReferenceProperty(Spot, required=True)
-  review = db.TextProperty(required=True)
-  rating = db.IntegerProperty(choices=set([1,2,3,4,5]))
-  posted_on = db.DateTimeProperty(auto_now_add=True)
-  disabled = db.BooleanProperty(default=False)
+
