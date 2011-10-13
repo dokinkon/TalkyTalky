@@ -153,6 +153,9 @@ currentWindow.add(spotTableView);
 
 spotTableView.addEventListener('click', function(e) {
 
+    // Save current Spot to App.Properties
+    Ti.App.Properties.setString('current-spot', e.rowData.title);
+
     var win = Ti.UI.createWindow({
         url:'spot-window.js',
         title:e.rowData.title,

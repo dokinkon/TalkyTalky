@@ -4,6 +4,8 @@ Ti.include('talky.js');
 
 
 
+
+
 // this sets the background color of the master UIView (when there are no windows/tab groups on it)
 Ti.UI.setBackgroundColor('#000');
 
@@ -15,7 +17,7 @@ var tabGroup = Ti.UI.createTabGroup();
 
 // create main window
 var mainWindow = Ti.UI.createWindow({
-    url:'main_windows/main_window.js',
+    url:'main_windows/main-window.js',
     title:'Main',
     backgroundColor:'#fff'
 });
@@ -32,7 +34,7 @@ var mainTab = Ti.UI.createTab({
 // create locationWindow
 
 Talky.locationWindow = Titanium.UI.createWindow({  
-    url:'main_windows/location_window.js',
+    url:'main_windows/location-window.js',
     title:'Location',
     backgroundColor:'#fff'
 });

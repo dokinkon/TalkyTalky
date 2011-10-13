@@ -1,5 +1,5 @@
-//Ti.include()
-//
+Ti.include('../talky.js')
+
 
 
 Ti.Facebook.appid = "280459581967624";
@@ -14,6 +14,16 @@ var fbButton = Ti.Facebook.createLoginButton({
 });
 
 currentWindow.add(fbButton);
+
+
+
+var versionLabel = Ti.UI.createLabel({
+    top:10,
+    left:10,
+    text:'version: ' + Talky.version,
+});
+
+currentWindow.add(versionLabel);
 
 
 
@@ -35,3 +45,32 @@ currentWindow.addEventListener('open', function(e){
 
 // TODO
 // Layout the Main Window
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

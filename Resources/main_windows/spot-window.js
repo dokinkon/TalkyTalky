@@ -54,6 +54,8 @@ shareButton.addEventListener('click', function(){
         Ti.API.info('response = ' + client.responseText);
         var result = JSON.parse(client.responseText);
         // TODO: parse result from GAE server
+
+        requestPosts();
     };
 
 
