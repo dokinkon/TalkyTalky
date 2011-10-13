@@ -119,8 +119,6 @@ submitButton.addEventListener('click', function(e){
     var data = {"spotName":"department-store", "content":textArea.value};
     var body = JSON.stringify(data);
 
-    //var url = 'http://lets-talky-talky.appspot.com/get-room-list';
-    //var url = 'http://127.0.0.1:8084/create-post';
     client.open('POST', Talky.createPostURL, true);
     client.setRequestHeader("Content-type", "application/json");
     client.setRequestHeader("Content-length", body.length);
@@ -139,6 +137,90 @@ submitButton.addEventListener('click', function(e){
 });
 
 
+var postContent = function(photo, content) {
+
+    var client = Ti.Network.createHTTPClient();
+
+    var uid = Ti.Facebook.uid;
+    var spotName = Ti.App.Properties.getString('current-spot');
+
+    //var data = {"userId":Ti.Facebook.uid,"spotName":currentWindow.title, "content":textArea.value};
+    //var body = JSON.stringify(data);
+
+    var data = 
+    {
+        "picture":photo,
+        "name":"photo-name"
+    };
+
+
+    client.setRequestHeader("enctype", "multipart/form-data");
+    client.setRequestHeader("Content-type", "image/png");
+    client.open('POST', Talky.sendImageURL, true);
+
+    client.onload = function() {
+        Ti.API.info('response = ' + client.responseText);
+
+        var imageView = Ti.UI.createImageView({
+            top:256,
+            left:20,
+            width:128,
+            height:128,
+            image:client.responseData
+        });
+
+        currentWindow.add(imageView);
+
+
+        //var result = JSON.parse(client.responseText);
+        // TODO: parse result from GAE server
+        //requestPosts();
+    };
+
+
+    client.onerror = function(e) {
+        alert(e.error);
+    };
+
+    client.send(data);
+    Ti.API.info('sending image...');
+}
+
+
+
+// Open Media Gallery..., Since my IPod doesn't have camera, use image from gallery.
+
+var pickPhotoFromGallery = function() {
+
+    Titanium.Media.openPhotoGallery({
+    //Ti.Media.openPhotoGallery({
+        success:function(e)
+        {
+            var image = e.media;
+            if (e.mediaType == Ti.Media.MEDIA_TYPE_PHOTO)
+            {
+                postContent(image, 'test');
+            }
+            else
+            {
+                alert('MediaType is not a PHOTO!');
+            }
+        },
+        cancel:function(e)
+        {
+        
+        },
+        error:function(e)
+        {
+
+        },
+        allowEditing:true,
+        mediaTypes:[Ti.Media.MEDIA_TYPE_PHOTO],
+    });
+}
+
+
+
 currentWindow.addEventListener('open', function(){
 
     var dialog = Ti.UI.createOptionDialog({
@@ -151,6 +233,7 @@ currentWindow.addEventListener('open', function(){
         if (e.index === 0) {
             Ti.API.info('Enable sharing with photo');
             Talky.sharingWithPhoto = true;
+            pickPhotoFromGallery();
         }
         else if (e.index === 1) {
             Ti.API.info('Disable sharing with photo');

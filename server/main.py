@@ -24,7 +24,8 @@ from django.utils import simplejson
 
 import logging
 import models
-import userpost
+from userpost import UserPost
+from useraccount import UserAccount
 import json
 
 from django.utils import simplejson
@@ -38,6 +39,54 @@ class MainHandler(webapp.RequestHandler):
         self.response.out.write('Hello World!')
 
 
+class CheckinHandler(webapp.RequestHandler):
+
+
+    def responseWithError(self, errorMessage):
+        response = {status:False, reason:errorMessage}
+        self.response.out.write(simplejson.dumps(response))
+
+    '''
+    http:<app-url>/check-in?uid=<facebook uid>&where=<spot-name>
+    '''
+    def get(self):
+        uid = self.request.get('uid')
+
+        if uid == None:
+            self.responseWithError('uid field is required')
+            return
+
+        spotName = self.request.get('spot-name')
+
+        if spotName == None:
+            self.responseWithError('spot-name is required')
+            return
+
+        query = UserAccount.all()
+        query.filter('userId = ', uid)
+        userAccount = query.get()
+
+        if userAccount == None:
+            userAccount = UserAccount(uid)
+            userAccount.put()
+            logging.info('Create an UserAccount for %s...', uid)
+        
+
+
+
+class DeletePostsHandler(webapp.RequestHandler):
+    def get(self):
+        spotName = unicode(self.request.get('spot-name'))
+
+        query = UserPost.all()
+        query.filter('spotName = ', spotName)
+
+        results = query.fetch(limit=1000)
+        for result in results:
+            result.delete()
+
+        self.response.out.write('Done')
+
 class GetPostHandler(webapp.RequestHandler):
 
     """
@@ -45,23 +94,16 @@ class GetPostHandler(webapp.RequestHandler):
     Handle GetPostRequest, return posts in some spot.
 
     """
-
-    def get(self):
-        self.impl()
-
     def post(self):
-        logging.info('WARNING: calling post in GetPostHandler (Maybe a bug from Titanium)')
-        self.impl()
-
-    def impl(self):
-
         logging.info('GetPostHandler...')
 
         request = simplejson.loads(self.request.body)
         
         spotName = request['spot-name']
+        
+        logging.info('spotName = %s', spotName);
 
-        query = db.Query(userpost.UserPost)
+        query = db.Query(UserPost)
 
         query.filter('spotName = ', spotName)
         #TODO Time sorting
@@ -74,6 +116,7 @@ class GetPostHandler(webapp.RequestHandler):
             
         self.response.headers['Content-Type'] = 'application/json; charset=utf-8'
         self.response.out.write(simplejson.dumps(posts))
+
 
 class CreatePostHandler(webapp.RequestHandler):
     """
@@ -107,7 +150,7 @@ class CreatePostHandler(webapp.RequestHandler):
 
 
         # create a UserPost object
-        userPost = userpost.UserPost(userId=userId, spotName=spotName)
+        userPost = UserPost(userId=userId, spotName=spotName)
         userPost.content = content
         key = userPost.put()
 
@@ -202,50 +245,8 @@ class Get_spot(webapp.RequestHandler):
         self.response.out.write(simplejson.dumps(spotList))
 
     def get(self): 
+        self.getSpot()
 
-        """
-        25.040846 121.525396
-        127.0.0.1:8084/get-spot-list?lat=25.040846&lon=121.525396
-        """
-
-        logging.debug('[GET]Start recieve HTTP request')
-        #Get Data from HTTP request
-
-        #logging.debug(self.request)
-        spot_lon  = float(self.request.get('lon', default_value='0'))
-        spot_lat  = float(self.request.get('lat', default_value='0'))
-        
-        print spot_lon
-        print spot_lat
-
-        my_spots = models.Spot.query(lat=spot_lat, 
-                                    lon=spot_lon, 
-                                    max_results=2, min_params=(2,0))
-        print my_spots
-
-        data = json.encode(my_spots)
-        self.response.headers['Content-Type'] = 'application/json; charset=utf-8'
-        self.response.out.write(data)
-
-        """
-        for distance, store in my_spots:
-            self.response.out.write(store.name)
-            self.response.out.write(store.location)
-        """
-            
-
-        '''
-        logging.debug('[GET]Query GAE DB')
-        #Query DB
-        data = db.GqlQuery('WHERE ', spot_long, spot_lat)
-
-        logging.debug('[GET]Transfer to JSON GAE DB')
-        #Return JSON object
-        self.response.headers['Content-Type'] = 'application/json'
-        output = simplejson.dump(data)
-        
-        self.response.out.write(output)
-        ''' 
 
     def post(self): 
         
@@ -302,7 +303,9 @@ def main():
              ('/get-spot-list',Get_spot),
              ('/create-spot', CreateSpotHandler),
              ('/create-post', CreatePostHandler),
-             ('/get-post-list', GetPostHandler)]
+             ('/get-post-list', GetPostHandler),
+             ('/del-posts', DeletePostsHandler),
+             ('/check-in', CheckinHandler)]
     
     application = webapp.WSGIApplication(sitemap,debug=True)
 
