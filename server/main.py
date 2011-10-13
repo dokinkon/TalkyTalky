@@ -64,7 +64,7 @@ class GetPostHandler(webapp.RequestHandler):
         query = db.Query(userpost.UserPost)
 
         query.filter('spotName = ', spotName)
-
+        #TODO Time sorting
         results = query.fetch(limit=10)
 
         posts = []
@@ -119,6 +119,55 @@ class CreatePostHandler(webapp.RequestHandler):
         
         self.response.headers['Content-Type'] = 'application/json; charset=utf-8'
         self.response.out.write(simplejson.dumps(response))
+
+class GetImageHandler(webapp.RequestHandler):
+
+    #Handle GetImageRequest, return image in some spot.
+    def get(self):
+        self.impl()
+
+    def post(self):
+        logging.info('WARNING: calling post in GetImageHandler (Maybe a bug from Titanium)')
+        self.impl()
+
+    def impl(self):
+        pic = db.get(self.request.get("img_id"))  
+
+        if pic.picture:  
+            self.response.headers['Content-Type'] = "image/png" 
+            self.response.out.write(obj.picture)   
+
+        
+class CreateImageHandler(webapp.RequestHandler):
+
+    #Handle CreateImageRequest, return image in some spot.
+    def get(self):
+        self.impl()
+
+    def post(self):
+        logging.info('WARNING: calling post in CreateImageHandler (Maybe a bug from Titanium)')
+        self.impl()
+
+    def impl(self):
+
+        postDict = simplejson.loads(self.request.body)
+
+        logging.info('Handling UserPost Request...')
+        
+
+        pic = Image()
+        pic.name = postDict['name']
+        content  = postDict['content']
+ 
+
+        # Check if the image upload  
+        # if yes, assign pic's content to obj's member 
+        if self.request.get('picture'):  
+            pic.picture = self.request.get('picture')  
+ 
+        #Write into DB
+        pic.put 
+
 
 
 class Get_spot(webapp.RequestHandler):
@@ -246,6 +295,8 @@ class Query_spot(webapp.RequestHandler):
  
 def main():
     sitemap=[('/',MainHandler),
+             ('/create-pic', CreateImageHandler), 
+             ('/img', GetImageHandler),
              ('/spot',Record_spot),   
              ('/q-spot',Query_spot),   
              ('/get-spot-list',Get_spot),
