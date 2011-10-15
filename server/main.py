@@ -35,12 +35,10 @@ from createspot import CreateSpotHandler
 
 class MainHandler(webapp.RequestHandler):
     def get(self):
-        
         self.response.out.write('Hello World!')
 
 
 class CheckinHandler(webapp.RequestHandler):
-
 
     def responseWithError(self, errorMessage):
         response = {status:False, reason:errorMessage}

@@ -24,17 +24,17 @@ def _earth_distance(lat1, lon1, lat2, lon2):
       math.cos(lat1) * math.cos(lat2) * math.cos(lon2 - lon1))
 
 class Spot(db.Model):
-    name = db.StringProperty()
-    description = db.StringProperty()
-    location = db.GeoPtProperty()
-    geoboxes = db.StringListProperty()
+  name = db.StringProperty()
+  description = db.StringProperty()
+  location = db.GeoPtProperty()
+  geoboxes = db.StringListProperty()
 
-    """
-    implicity properties
-    users:<collection of TalkyUser>
-    posts:<collection of UserPost>
+  """
+  implicity properties
+  users:<collection of TalkyUser>
+  posts:<collection of UserPost>
 
-    """ 
+  """ 
     
 
 

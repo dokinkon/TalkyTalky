@@ -1,14 +1,16 @@
 
 from google.appengine.ext import db
+from talkyuser import TalkyUser
+from spot import Spot
 
 
 class UserPost(db.Model):
     #Has one to many relation?
 
-    owner = db.ReferenceProperty(reference_class=TalkyUser, collection_name=posts)
+    owner    = db.ReferenceProperty(reference_class=TalkyUser, collection_name='posts')
     dateTime = db.DateTimeProperty(auto_now_add=True)
-    content = db.StringProperty(multiline=True) 
-    spot = db.ReferenceProperty(reference_class=Spot, collection_name=posts)
+    content  = db.StringProperty(multiline=True) 
+    spot = db.ReferenceProperty(reference_class=Spot, collection_name='posts')
 
     image = db.BlobProperty()
    
