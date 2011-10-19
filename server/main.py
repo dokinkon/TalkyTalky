@@ -44,14 +44,20 @@ class MainHandler(webapp.RequestHandler):
     def get(self):
         self.response.out.write('Hello World!')
 
+#Protocol 0001
 class LoginHandler(webapp.RequestHandler):
     
     '''
-    http:<app-url>/login?uid=<facebook uid>
+    http:<app-url>/login
     '''
-    #using get? security issue
-    def get(self):
-        fb_uid = self.request.get('uid')
+    
+    def post(self):
+        
+        logging.info('LoginHandler...')
+
+        request = simplejson.loads(self.request.body)
+        
+        uid = request['uid']
 
         if uid == None:
             self.responseWithError('uid field is required')
@@ -59,17 +65,22 @@ class LoginHandler(webapp.RequestHandler):
 
         #Get Talkyuser object if it exists or create new one
         query = TalkyUser.all()
-        query.filter('uid = ', fb_uid)
+        query.filter('fb-uid = ', uid)
         userAccount = query.get()
 
         if userAccount == None:
-            userAccount = TalkyUser(fb_uid)
+            userAccount = TalkyUser(uid)
             userAccount.put()
-            logging.info('Create an UserAccoun TalkyUser for fb_string %s...', fb_uid)
+
+            logging.info('Create an UserAccoun TalkyUser for fb_string %s...', fb-uid)
         else: #number>1
             self.responseWithError('uid\'s number > 1')
             return
-        response = {'result':True, 'uid':fb_uid}
+        
+        key = userAccount.key()
+        tid = key.id()
+
+        response = {'result':True, 'uid':tid}
 
         self.response.headers['Content-Type'] = 'application/json; charset=utf-8'
         self.response.out.write(simplejson.dumps(response))
@@ -276,7 +287,8 @@ class Get_spot(webapp.RequestHandler):
 
         #need to check users:{spot.users} 
         for distance, spot in spots:
-            spotList.append({'name':spot.name, 'description':spot.description, users:{spot.users} })
+            #spotList.append({'name':spot.name, 'description':spot.description, users:{spot.users} })
+            spotList.append({'name':spot.name, 'description':spot.description})
 
         
         self.response.headers['Content-Type'] = 'application/json; charset=utf-8'
