@@ -257,7 +257,7 @@ class CreateImageHandler(webapp.RequestHandler):
         pic.put 
 
 
-
+#protocol 0002
 class Get_spot(webapp.RequestHandler):
 
     def getSpot(self):
@@ -286,9 +286,11 @@ class Get_spot(webapp.RequestHandler):
         #need to check users:{spot.users} 
         for distance, spot in spots:
             #spotList.append({'name':spot.name, 'description':spot.description, users:{spot.users} })
-            spotList.append({'name':spot.name, 'description':spot.description})
+            user_num = spot.users.count()
+            spotList.append({'name':spot.name, 'description':spot.description, 'location':spot.location, 'user_num':user_num})
 
-        
+        response = {'success':True, 'spots':spotList }
+
         self.response.headers['Content-Type'] = 'application/json; charset=utf-8'
         self.response.out.write(simplejson.dumps(spotList))
 
