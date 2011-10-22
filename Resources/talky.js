@@ -15,10 +15,10 @@ var Talky = {
     //getPostsURL:  'http://lets-talky-talky.appspot.com/get-post-list',
     //loginURL:'http://127.0.0.1:8084/login',
     loginURL:'http://10.0.2.2:8084/login',
-    getSpotURL:'http://127.0.0.1:8084/get-spot-list',
-    createPostURL:'http://127.0.0.1:8084/create-post',
-    getPostsURL:'http://127.0.0.1:8084/get-post-list',
-    sendImageURL:'http://127.0.0.1:8084/send-image',
+    getSpotURL:'http://10.0.2.2:8084/get-spot-list',
+    createPostURL:'http://10.0.2.2:8084/create-post',
+    getPostsURL:'http://10.0.2.2:8084/get-post-list',
+    sendImageURL:'http://10.0.2.2:8084/send-image',
     locationTabIndex:0,
 };
 
