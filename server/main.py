@@ -25,8 +25,7 @@ import logging
 import json
 
 
-import spot
-#from spot import Spot
+from spot import Spot
 from userpost import UserPost
 from useraccount import UserAccount
 
@@ -36,9 +35,9 @@ from django.utils import simplejson
 
 from createspot import CreateSpotHandler
 
-def responseWithError(self, errorMessage):
-    response = {success:False, error:errorMessage}
-    self.response.out.write(simplejson.dumps(response))
+def responseWithError(out, errorMessage):
+    response = {'success':False, 'error':errorMessage}
+    out.write(simplejson.dumps(response))
 
 class MainHandler(webapp.RequestHandler):
     def get(self):
@@ -59,7 +58,7 @@ class LoginHandler(webapp.RequestHandler):
         uid = request['fb_uid']
 
         if uid == None:
-            self.responseWithError('uid field is required')
+            responseWithError(self.response.out, 'uid field is required')
             return
 
         #Get Talkyuser object if it exists or create new one
@@ -67,7 +66,7 @@ class LoginHandler(webapp.RequestHandler):
         query.filter('fb_uid = ', uid)
         
         if query.count() > 1 : 
-            self.responseWithError('Query fb user\'s number > 1')
+            responseWithError(self.response.out, 'Query fb user\'s number > 1')
             return
 
         userAccount = query.get()
@@ -98,13 +97,13 @@ class CheckinHandler(webapp.RequestHandler):
         uid = self.request.get('uid')
 
         if uid == None:
-            self.responseWithError('uid field is required')
+            responseWithError(self.response.out, 'uid field is required')
             return
 
         spotName = self.request.get('spot-name')
 
         if spotName == None:
-            self.responseWithError('spot-name is required')
+            responseWithError(self.response.out, 'spot-name is required')
             return
 
         query = UserAccount.all()
@@ -186,7 +185,7 @@ class CreatePostHandler(webapp.RequestHandler):
 
 
         # Find Spot Model by name
-        spotQuery = db.Query(spot.Spot)
+        spotQuery = db.Query(Spot)
         spotQuery.filter("name =", spotName)
 
         result = spotQuery.fetch(limit=1)
@@ -260,49 +259,34 @@ class CreateImageHandler(webapp.RequestHandler):
 #protocol 0002
 class Get_spot(webapp.RequestHandler):
 
-    def getSpot(self):
+    def post(self):
 
-        """
-        Because Titanium can't send 'GET' request normally,
-        I decided to wrap getSpot function and let get and post to call it directly
-        """
-
+        '''
         #logging.info('request = %s', self.request)
         logging.info('url = %s', self.request.url)
         logging.info('body = %s', self.request.body)
-
+        '''
         queryDict = simplejson.loads(self.request.body)
         
-        uid = queryDict['uid']
+        uid = queryDict['talky_uid']
         lon = queryDict['lon']
         lat = queryDict['lat']
 
-        logging.info('Receive GetSpot Request. lon = %s, lat = %s', lon, lat)
+        #logging.info('Receive GetSpot Request. lon = %s, lat = %s', lon, lat)
         
-        spots = spot.Spot.query(lat=lat, lon=lon, max_results=2, min_params=(2,0))
+        spots = Spot.query(lat=lat, lon=lon, max_results=2, min_params=(2,0))
 
         spotList = [];
 
-        #need to check users:{spot.users} 
         for distance, spot in spots:
-            #spotList.append({'name':spot.name, 'description':spot.description, users:{spot.users} })
             user_num = spot.users.count()
-            spotList.append({'name':spot.name, 'description':spot.description, 'location':spot.location, 'user_num':user_num})
+            spotList.append({'id':spot.key().id(), 'name':spot.name, 'description':spot.description,'user_num':user_num})
 
         response = {'success':True, 'spots':spotList }
 
         self.response.headers['Content-Type'] = 'application/json; charset=utf-8'
-        self.response.out.write(simplejson.dumps(spotList))
-
-    def get(self): 
-        self.getSpot()
-
-
-    def post(self): 
-        
-        logging.debug('[POST]Start recieve HTTP request')
-        self.getSpot()
-        
+        self.response.out.write(simplejson.dumps(response))
+ 
 
 class Record_spot(webapp.RequestHandler): 
 
@@ -328,14 +312,14 @@ class Record_spot(webapp.RequestHandler):
         print lat
         print lon
 
-        new_spot = spot.Spot.add(name=name,lat=lat, lon=lon, description=description)
+        new_spot = Spot.add(name=name,lat=lat, lon=lon, description=description)
         self.response.out.write('done')
 
 
 class Query_spot(webapp.RequestHandler): 
     def get(self):
          
-        query = db.Query(spot.Spot)  
+        query = db.Query(Spot)  
         #query = Spot.all()
         
         for msg in query:
