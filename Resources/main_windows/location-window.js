@@ -257,9 +257,8 @@ var onLocationAvailable = function(e) {
         alert(e.error);
 
     };
-
+    Ti.API.info(Talky.getSpotURL);
     Ti.API.info(JSON.stringify(data));
-
     xhr.send(JSON.stringify(data));
 }
 
