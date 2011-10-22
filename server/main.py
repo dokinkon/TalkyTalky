@@ -42,37 +42,6 @@ def responseWithError(self, errorMessage):
 
 class MainHandler(webapp.RequestHandler):
     def get(self):
-<<<<<<< HEAD
-        
-        self.response.out.write("""
-                <html>
-                <head></head>
-                <body>
-                <form method="post" action="/send-image" enctype="multipart/form-data">
-                    <tr>
-                    <th>image</th>
-                    <td colspan="3"><input type="file" name="picture" id="picture" size="60" /></td>
-                    <input type="submit" value="send"/>
-                    </tr>
-                </form>
-                </body>
-                </html>
-                """)
-
-
-class ImageHandler(webapp.RequestHandler):
-    def post(self):
-        logging.info('ImageHandler...')
-        #logging.info(self.request.url)
-        #logging.info(self.request.body)
-
-        image = self.request.get('picture')
-        if image != None:
-            logging.info('may have image...')
-            
-        self.response.headers['Content-Type'] = "image/png"
-        self.response.out.write(image)
-=======
         self.response.out.write('Hello World!')
 
 #Protocol 0001
@@ -85,8 +54,6 @@ class LoginHandler(webapp.RequestHandler):
     def post(self):
         
         logging.info('LoginHandler...')
->>>>>>> 8e9863b18a2c753b3e0c09d34c0c94bd79ab50c5
-
         request = simplejson.loads(self.request.body)
         
         uid = request['uid']
