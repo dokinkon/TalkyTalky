@@ -42,7 +42,7 @@ Talky.locationWindow = Titanium.UI.createWindow({
 
 
 var locationTab = Titanium.UI.createTab({  
-    icon:'icons/location.png',
+    icon:'images/location.png',
     title:'定位',
     window:Talky.locationWindow
 });
@@ -64,7 +64,7 @@ Talky.shareBeautyWindow = Titanium.UI.createWindow({
 
 
 var tab2 = Titanium.UI.createTab({  
-    icon:'sharing-beauty.png',
+    icon:'images/sharing-beauty.png',
     title:'分享正妹',
     window:Talky.shareBeautyWindow
 });
@@ -75,7 +75,8 @@ Talky.shareHandsomeWindow = Ti.UI.createWindow({
 });
 
 var shareHandsomeTab = Ti.UI.createTab({
-    icon:'icons/sharing-handsome.png',
+    icon:'images/sharing-handsome.png',
+    title:'分享帥哥',
     window:Talky.shareHandsomeWindow
 });
 
@@ -85,7 +86,8 @@ Talky.messageNotificationWindow = Ti.UI.createWindow({
 });
 
 var messageNotificationTab = Ti.UI.createTab({
-    icon:'icons/message-notification.png',
+    icon:'images/message-notification.png',
+    title:'訊息',
     window:Talky.messageNotificationWindow
 });
 
