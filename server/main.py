@@ -55,7 +55,6 @@ class LoginHandler(webapp.RequestHandler):
     def post(self):
         
         logging.info('LoginHandler...')
-
         request = simplejson.loads(self.request.body)
         
         uid = request['fb_uid']
@@ -356,7 +355,8 @@ def main():
              ('/create-post', CreatePostHandler),
              ('/get-post-list', GetPostHandler),
              ('/del-posts', DeletePostsHandler),
-             ('/check-in', CheckinHandler)]
+             ('/check-in', CheckinHandler),
+             ('/send-image', ImageHandler)]
     
     application = webapp.WSGIApplication(sitemap,debug=True)
 
