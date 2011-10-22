@@ -40,7 +40,6 @@ def responseWithError(self, errorMessage):
     response = {success:False, error:errorMessage}
     self.response.out.write(simplejson.dumps(response))
 
-
 class MainHandler(webapp.RequestHandler):
     def get(self):
         self.response.out.write('Hello World!')
@@ -65,7 +64,6 @@ class LoginHandler(webapp.RequestHandler):
 
         #Get Talkyuser object if it exists or create new one
         query = TalkyUser.all()
-        
         query.filter('fb_uid = ', uid)
         
         if query.count() > 1 : 
@@ -75,15 +73,16 @@ class LoginHandler(webapp.RequestHandler):
         userAccount = query.get()
 
         if userAccount == None:
-            userAccount = TalkyUser(uid)
+            logging.info('get result')
+            #userAccount = TalkyUser(uid)
+            userAccount = TalkyUser()
+            userAccount.fb_uid = uid
             userAccount.put()
-
-            logging.info('Create an UserAccoun TalkyUser for fb_string %s...', fb_uid)
-        
+            logging.info('Create an UserAccoun TalkyUser for fb_string %s...', uid)
         key = userAccount.key()
         tid = key.id()
 
-        response = {'result':True, 'uid':tid}
+        response = {'success':True, 'talky_uid':tid}
 
         self.response.headers['Content-Type'] = 'application/json; charset=utf-8'
         self.response.out.write(simplejson.dumps(response))
@@ -355,8 +354,7 @@ def main():
              ('/create-post', CreatePostHandler),
              ('/get-post-list', GetPostHandler),
              ('/del-posts', DeletePostsHandler),
-             ('/check-in', CheckinHandler),
-             ('/send-image', ImageHandler)]
+             ('/check-in', CheckinHandler)]
     
     application = webapp.WSGIApplication(sitemap,debug=True)
 

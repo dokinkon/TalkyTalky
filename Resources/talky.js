@@ -13,7 +13,7 @@ var Talky = {
     //getSpotURL:   'http://lets-talky-talky.appspot.com/get-spot-list',
     //createPostURL:'http://lets-talky-talky.appspot.com/create-post',
     //getPostsURL:  'http://lets-talky-talky.appspot.com/get-post-list',
-    loginURL:'http:127.0.0.1:8084/login',
+    loginURL:'http://127.0.0.1:8084/login',
     getSpotURL:'http://127.0.0.1:8084/get-spot-list',
     createPostURL:'http://127.0.0.1:8084/create-post',
     getPostsURL:'http://127.0.0.1:8084/get-post-list',
