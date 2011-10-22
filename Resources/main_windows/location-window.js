@@ -223,7 +223,7 @@ var onLocationAvailable = function(e) {
 
     var data = 
     {
-        talky_uid = Ti.App.Properties.getString('talky_uid');
+        talky_uid:Ti.App.Properties.getString('talky_uid'),
         lat:e.coords.latitude,
         lon:e.coords.longitude,
     };
@@ -251,15 +251,16 @@ var onLocationAvailable = function(e) {
     };
 
 
-    client.onerror = function(e) {
+    xhr.onerror = function(e) {
         activityIndicator.hide();
         Ti.API.info('onerror: ' + body);
         alert(e.error);
 
     };
 
-    client.send(body);
-    statusLabel.text = 'Just Send Request:' + Talky.getSpotURL;
+    Ti.API.info(JSON.stringify(data));
+
+    xhr.send(JSON.stringify(data));
 }
 
 

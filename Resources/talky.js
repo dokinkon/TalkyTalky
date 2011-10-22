@@ -13,7 +13,8 @@ var Talky = {
     //getSpotURL:   'http://lets-talky-talky.appspot.com/get-spot-list',
     //createPostURL:'http://lets-talky-talky.appspot.com/create-post',
     //getPostsURL:  'http://lets-talky-talky.appspot.com/get-post-list',
-    loginURL:'http://127.0.0.1:8084/login',
+    //loginURL:'http://127.0.0.1:8084/login',
+    loginURL:'http://10.0.2.2:8084/login',
     getSpotURL:'http://127.0.0.1:8084/get-spot-list',
     createPostURL:'http://127.0.0.1:8084/create-post',
     getPostsURL:'http://127.0.0.1:8084/get-post-list',
@@ -43,7 +44,7 @@ Talky.login = function(callback) {
 
     xhr.onload = function() {
 
-        Ti.API.info('response = ' + xhr.responseText);
+        //Ti.API.info('response = ' + xhr.responseText);
         var response = JSON.parse(xhr.responseText);
 
         if (!response.success)
@@ -52,7 +53,7 @@ Talky.login = function(callback) {
             return;
         }
 
-        Ti.API.info('login successful');
+        //Ti.API.info('login successful');
         Ti.App.Properties.setString('talky_uid',response.talky_uid);
     };
 
@@ -60,7 +61,7 @@ Talky.login = function(callback) {
         alert(e.error);
     };
 
-    Ti.API.info(JSON.stringify(data));
+    //Ti.API.info(JSON.stringify(data));
 
     xhr.send(JSON.stringify(data));
 }

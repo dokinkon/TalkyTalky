@@ -20,6 +20,7 @@ var tableViewData =
     {title:'熱門看板', hasChild:true},
     {title:'我的最愛', hasChild:true},
     {title:'設定'    , hasChild:true},
+    {title:'關於'    , hasChild:true},
 ];
 
 var tableView = Ti.UI.createTableView({
