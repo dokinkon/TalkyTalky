@@ -36,8 +36,34 @@ from createspot import CreateSpotHandler
 class MainHandler(webapp.RequestHandler):
     def get(self):
         
-        self.response.out.write('Hello World!')
+        self.response.out.write("""
+                <html>
+                <head></head>
+                <body>
+                <form method="post" action="/send-image" enctype="multipart/form-data">
+                    <tr>
+                    <th>image</th>
+                    <td colspan="3"><input type="file" name="picture" id="picture" size="60" /></td>
+                    <input type="submit" value="send"/>
+                    </tr>
+                </form>
+                </body>
+                </html>
+                """)
 
+
+class ImageHandler(webapp.RequestHandler):
+    def post(self):
+        logging.info('ImageHandler...')
+        #logging.info(self.request.url)
+        #logging.info(self.request.body)
+
+        image = self.request.get('picture')
+        if image != None:
+            logging.info('may have image...')
+            
+        self.response.headers['Content-Type'] = "image/png"
+        self.response.out.write(image)
 
 class CheckinHandler(webapp.RequestHandler):
 
@@ -254,7 +280,8 @@ def main():
              ('/create-post', CreatePostHandler),
              ('/get-post-list', GetPostHandler),
              ('/del-posts', DeletePostsHandler),
-             ('/check-in', CheckinHandler)]
+             ('/check-in', CheckinHandler),
+             ('/send-image', ImageHandler)]
     
     application = webapp.WSGIApplication(sitemap,debug=True)
 
