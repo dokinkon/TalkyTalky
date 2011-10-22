@@ -89,6 +89,7 @@ class Spot(db.Model):
       logging.info("Searching for box=%s at resolution=%s, slice=%s",
                     box, resolution, slice)
       query = self.all().filter("geoboxes =", box)
+      #results spot objs
       results = query.fetch(50)
       logging.info("Found %d results", len(results))
 

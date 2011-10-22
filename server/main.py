@@ -15,7 +15,6 @@
 # limitations under the License.
 #
 
-
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import util
 
@@ -23,18 +22,27 @@ from google.appengine.ext import db
 from django.utils import simplejson
 
 import logging
-import models
+import json
+
+import spot
+#from spot import Spot
 from userpost import UserPost
 from useraccount import UserAccount
-import json
+
+from talkyuser import TalkyUser
 
 from django.utils import simplejson
 
 from createspot import CreateSpotHandler
 
+def responseWithError(self, errorMessage):
+    response = {status:False, reason:errorMessage}
+    self.response.out.write(simplejson.dumps(response))
+
 
 class MainHandler(webapp.RequestHandler):
     def get(self):
+<<<<<<< HEAD
         
         self.response.out.write("""
                 <html>
@@ -64,9 +72,54 @@ class ImageHandler(webapp.RequestHandler):
             
         self.response.headers['Content-Type'] = "image/png"
         self.response.out.write(image)
+=======
+        self.response.out.write('Hello World!')
+
+#Protocol 0001
+class LoginHandler(webapp.RequestHandler):
+    
+    '''
+    http:<app-url>/login
+    '''
+    
+    def post(self):
+        
+        logging.info('LoginHandler...')
+>>>>>>> 8e9863b18a2c753b3e0c09d34c0c94bd79ab50c5
+
+        request = simplejson.loads(self.request.body)
+        
+        uid = request['uid']
+
+        if uid == None:
+            self.responseWithError('uid field is required')
+            return
+
+        #Get Talkyuser object if it exists or create new one
+        query = TalkyUser.all()
+        query.filter('fb-uid = ', uid)
+        userAccount = query.get()
+
+        if userAccount == None:
+            userAccount = TalkyUser(uid)
+            userAccount.put()
+
+            logging.info('Create an UserAccoun TalkyUser for fb_string %s...', fb-uid)
+        else: #number>1
+            self.responseWithError('uid\'s number > 1')
+            return
+        
+        key = userAccount.key()
+        tid = key.id()
+
+        response = {'result':True, 'uid':tid}
+
+        self.response.headers['Content-Type'] = 'application/json; charset=utf-8'
+        self.response.out.write(simplejson.dumps(response))
+
+        
 
 class CheckinHandler(webapp.RequestHandler):
-
 
     def responseWithError(self, errorMessage):
         response = {status:False, reason:errorMessage}
@@ -132,7 +185,7 @@ class GetPostHandler(webapp.RequestHandler):
         query = db.Query(UserPost)
 
         query.filter('spotName = ', spotName)
-
+        #TODO Time sorting
         results = query.fetch(limit=10)
 
         posts = []
@@ -167,7 +220,7 @@ class CreatePostHandler(webapp.RequestHandler):
 
 
         # Find Spot Model by name
-        spotQuery = db.Query(models.Spot)
+        spotQuery = db.Query(spot.Spot)
         spotQuery.filter("name =", spotName)
 
         result = spotQuery.fetch(limit=1)
@@ -189,6 +242,55 @@ class CreatePostHandler(webapp.RequestHandler):
         self.response.headers['Content-Type'] = 'application/json; charset=utf-8'
         self.response.out.write(simplejson.dumps(response))
 
+class GetImageHandler(webapp.RequestHandler):
+
+    #Handle GetImageRequest, return image in some spot.
+    def get(self):
+        self.impl()
+
+    def post(self):
+        logging.info('WARNING: calling post in GetImageHandler (Maybe a bug from Titanium)')
+        self.impl()
+
+    def impl(self):
+        pic = db.get(self.request.get("img_id"))  
+
+        if pic.picture:  
+            self.response.headers['Content-Type'] = "image/png" 
+            self.response.out.write(obj.picture)   
+
+        
+class CreateImageHandler(webapp.RequestHandler):
+
+    #Handle CreateImageRequest, return image in some spot.
+    def get(self):
+        self.impl()
+
+    def post(self):
+        logging.info('WARNING: calling post in CreateImageHandler (Maybe a bug from Titanium)')
+        self.impl()
+
+    def impl(self):
+
+        postDict = simplejson.loads(self.request.body)
+
+        logging.info('Handling UserPost Request...')
+        
+
+        pic = Image()
+        pic.name = postDict['name']
+        content  = postDict['content']
+ 
+
+        # Check if the image upload  
+        # if yes, assign pic's content to obj's member 
+        if self.request.get('picture'):  
+            pic.picture = self.request.get('picture')  
+ 
+        #Write into DB
+        pic.put 
+
+
 
 class Get_spot(webapp.RequestHandler):
 
@@ -204,18 +306,21 @@ class Get_spot(webapp.RequestHandler):
         logging.info('body = %s', self.request.body)
 
         queryDict = simplejson.loads(self.request.body)
-
+        
+        uid = queryDict['uid']
         lon = queryDict['lon']
         lat = queryDict['lat']
 
         logging.info('Receive GetSpot Request. lon = %s, lat = %s', lon, lat)
         
-        spots = models.Spot.query(lat=lat, lon=lon, max_results=2, min_params=(2,0))
+        spots = spot.Spot.query(lat=lat, lon=lon, max_results=2, min_params=(2,0))
 
         spotList = [];
 
+        #need to check users:{spot.users} 
         for distance, spot in spots:
-            spotList.append({'name':spot.name})
+            #spotList.append({'name':spot.name, 'description':spot.description, users:{spot.users} })
+            spotList.append({'name':spot.name, 'description':spot.description})
 
         
         self.response.headers['Content-Type'] = 'application/json; charset=utf-8'
@@ -255,14 +360,14 @@ class Record_spot(webapp.RequestHandler):
         print lat
         print lon
 
-        new_spot = models.Spot.add(name=name,lat=lat, lon=lon, description=description)
+        new_spot = spot.Spot.add(name=name,lat=lat, lon=lon, description=description)
         self.response.out.write('done')
 
 
 class Query_spot(webapp.RequestHandler): 
     def get(self):
          
-        query = db.Query(models.Spot)  
+        query = db.Query(spot.Spot)  
         #query = Spot.all()
         
         for msg in query:
@@ -273,6 +378,9 @@ class Query_spot(webapp.RequestHandler):
  
 def main():
     sitemap=[('/',MainHandler),
+             ('/login', LoginHandler), 
+             ('/create-pic', CreateImageHandler), 
+             ('/img', GetImageHandler),
              ('/spot',Record_spot),   
              ('/q-spot',Query_spot),   
              ('/get-spot-list',Get_spot),

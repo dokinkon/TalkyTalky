@@ -15,6 +15,22 @@ var fbButton = Ti.Facebook.createLoginButton({
 
 currentWindow.add(fbButton);
 
+var tableViewData = 
+[
+    {title:'熱門看板', hasChild:true},
+    {title:'我的最愛', hasChild:true},
+    {title:'設定'    , hasChild:true},
+];
+
+var tableView = Ti.UI.createTableView({
+    data:tableViewData,
+    bottom:60,
+});
+
+currentWindow.add(tableView);
+
+
+
 
 
 var versionLabel = Ti.UI.createLabel({
@@ -39,6 +55,7 @@ currentWindow.addEventListener('open', function(e){
 
     // Login the user and authorize our app
     Ti.Facebook.authorize();
+    Talky.login();
 
 });
 
