@@ -20,7 +20,7 @@ class TalkyUser(db.Model):
     """
     #TODO
     #User Pereference...
-    #def __init__(self, uid):
-        #self.fb_uid = uid
-    def get_fb_id(self):
+    def __init__(self, fb_uid):
+        self.fb_uid = fb_uid
+    def get_fb_id(fb_self):
         return self.fb_uid
