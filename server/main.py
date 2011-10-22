@@ -24,6 +24,7 @@ from django.utils import simplejson
 import logging
 import json
 
+
 import spot
 #from spot import Spot
 from userpost import UserPost
@@ -36,7 +37,7 @@ from django.utils import simplejson
 from createspot import CreateSpotHandler
 
 def responseWithError(self, errorMessage):
-    response = {status:False, reason:errorMessage}
+    response = {success:False, error:errorMessage}
     self.response.out.write(simplejson.dumps(response))
 
 
@@ -57,7 +58,7 @@ class LoginHandler(webapp.RequestHandler):
 
         request = simplejson.loads(self.request.body)
         
-        uid = request['uid']
+        uid = request['fb_uid']
 
         if uid == None:
             self.responseWithError('uid field is required')
@@ -65,17 +66,20 @@ class LoginHandler(webapp.RequestHandler):
 
         #Get Talkyuser object if it exists or create new one
         query = TalkyUser.all()
-        query.filter('fb-uid = ', uid)
+        
+        query.filter('fb_uid = ', uid)
+        
+        if query.count() > 1 : 
+            self.responseWithError('Query fb user\'s number > 1')
+            return
+
         userAccount = query.get()
 
         if userAccount == None:
             userAccount = TalkyUser(uid)
             userAccount.put()
 
-            logging.info('Create an UserAccoun TalkyUser for fb_string %s...', fb-uid)
-        else: #number>1
-            self.responseWithError('uid\'s number > 1')
-            return
+            logging.info('Create an UserAccoun TalkyUser for fb_string %s...', fb_uid)
         
         key = userAccount.key()
         tid = key.id()
@@ -86,12 +90,8 @@ class LoginHandler(webapp.RequestHandler):
         self.response.out.write(simplejson.dumps(response))
 
         
-
+#protocol 0003
 class CheckinHandler(webapp.RequestHandler):
-
-    def responseWithError(self, errorMessage):
-        response = {status:False, reason:errorMessage}
-        self.response.out.write(simplejson.dumps(response))
 
     '''
     http:<app-url>/check-in?uid=<facebook uid>&where=<spot-name>
