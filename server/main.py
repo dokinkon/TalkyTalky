@@ -39,7 +39,6 @@ def responseWithError(self, errorMessage):
     response = {status:False, reason:errorMessage}
     self.response.out.write(simplejson.dumps(response))
 
-
 class MainHandler(webapp.RequestHandler):
     def get(self):
         self.response.out.write('Hello World!')
@@ -56,7 +55,7 @@ class LoginHandler(webapp.RequestHandler):
         logging.info('LoginHandler...')
         request = simplejson.loads(self.request.body)
         
-        uid = request['uid']
+        uid = request['fb_uid']
 
         if uid == None:
             self.responseWithError('uid field is required')
@@ -64,22 +63,21 @@ class LoginHandler(webapp.RequestHandler):
 
         #Get Talkyuser object if it exists or create new one
         query = TalkyUser.all()
-        query.filter('fb-uid = ', uid)
+        query.filter('fb_uid = ', uid)
         userAccount = query.get()
 
         if userAccount == None:
-            userAccount = TalkyUser(uid)
+            logging.info('get result')
+            #userAccount = TalkyUser(uid)
+            userAccount = TalkyUser()
+            userAccount.fb_uid = uid
             userAccount.put()
-
-            logging.info('Create an UserAccoun TalkyUser for fb_string %s...', fb-uid)
-        else: #number>1
-            self.responseWithError('uid\'s number > 1')
-            return
+            logging.info('Create an UserAccoun TalkyUser for fb_string %s...', uid)
         
         key = userAccount.key()
         tid = key.id()
 
-        response = {'result':True, 'uid':tid}
+        response = {'success':True, 'talky_uid':tid}
 
         self.response.headers['Content-Type'] = 'application/json; charset=utf-8'
         self.response.out.write(simplejson.dumps(response))
@@ -355,8 +353,7 @@ def main():
              ('/create-post', CreatePostHandler),
              ('/get-post-list', GetPostHandler),
              ('/del-posts', DeletePostsHandler),
-             ('/check-in', CheckinHandler),
-             ('/send-image', ImageHandler)]
+             ('/check-in', CheckinHandler)]
     
     application = webapp.WSGIApplication(sitemap,debug=True)
 

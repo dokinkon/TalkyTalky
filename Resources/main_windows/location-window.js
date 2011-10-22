@@ -174,6 +174,8 @@ spotTableView.addEventListener('click', function(e) {
  * Arg:
  *   spots: a list contains spots
  *
+ * Remark:
+ *   check protocol 0002
  *
  */
 var onSpotsAvailable = function(spots) {
@@ -182,7 +184,12 @@ var onSpotsAvailable = function(spots) {
     statusLabel.text = 'Spots Available Now';
 
     for (var i=0;i<spots.length;i+=1){
-        spotData[i] = {title:spots[i].name, hasChild:true};
+        spotData[i] = 
+        {
+            title:spots[i].name,
+            id:spots[i].id,
+            hasChild:true,
+        };
     }
 
     spotTableView.setData(spotData);
@@ -211,27 +218,36 @@ var onLocationAvailable = function(e) {
     latitudeLabel.text = e.coords.latitude;
     longitudeLabel.text = e.coords.longitude;
 
-    var data = {"lat":e.coords.latitude, "lon":e.coords.longitude, "accuracy":e.coords.accuracy};
-    var body = JSON.stringify(data);
 
-    var client = Ti.Network.createHTTPClient();
+    // PROTOCOL 0002
 
-    client.open('POST', Talky.getSpotURL, true);
-    client.setRequestHeader("Content-type", "application/json");
-    client.setTimeout(1000);
+    var data = 
+    {
+        talky_uid = Ti.App.Properties.getString('talky_uid');
+        lat:e.coords.latitude,
+        lon:e.coords.longitude,
+    };
 
-    client.onload = function() {
+    var xhr = Ti.Network.createHTTPClient();
 
-        Ti.API.info('response = ' + client.responseText);
-        var spotList = JSON.parse(client.responseText);
-        statusLabel.text = 'Received Response';
+    xhr.open('POST', Talky.getSpotURL, true);
+    xhr.setRequestHeader("Content-type", "application/json");
+    xhr.setTimeout(1000);
 
-        for (var i=0;i<spotList.length;i+=1)
+    xhr.onload = function() {
+
+        Ti.API.info('response = ' + xhr.responseText);
+
+        var response = JSON.parse(xhr.responseText);
+
+        if (response.success!=true)
         {
-            Ti.API.info("spotName = " + spotList[i].name);
+            alert(response.error);
+            return;
         }
 
-        onSpotsAvailable(spotList);
+        var spots = response.spots;
+        onSpotsAvailable(spots);
     };
 
 
