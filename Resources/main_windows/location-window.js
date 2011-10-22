@@ -253,7 +253,7 @@ var onLocationAvailable = function(e) {
 
     xhr.onerror = function(e) {
         activityIndicator.hide();
-        Ti.API.info('onerror: ' + body);
+        //Ti.API.info('onerror: ' + body);
         alert(e.error);
 
     };
@@ -285,7 +285,7 @@ currentWindow.add(searchBar);
 
 var requestGeolocation = function() {
 
-    activityIndicator.show();
+    //activityIndicator.show();
 
 
     if (Ti.Geolocation.locationServicesEnabled === false)
