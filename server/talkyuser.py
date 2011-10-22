@@ -5,7 +5,7 @@ from spot import Spot
 
 class TalkyUser(db.Model):
     #Facebook fb-id
-    fb-id = db.StringProperty()
+    fb_id = db.StringProperty()
 
     #Indicate where am I
     spot = db.ReferenceProperty(reference_class=Spot, collection_name='users')
@@ -20,7 +20,7 @@ class TalkyUser(db.Model):
     """
     #TODO
     #User Pereference...
-    def __init__(self, fb-id):
-        self.fb-id = fb-id
-    def get_fb-id(self):
-        return self.fb-id
+    def __init__(self, fb_id):
+        self.fb_id = fb_id
+    def get_fb_id(self):
+        return self.fb_id
