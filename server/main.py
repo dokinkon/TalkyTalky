@@ -29,6 +29,7 @@ from useraccount import UserAccount
 from talkyuser import TalkyUser
 
 from userpost import UserPost
+from userpost import TestModel
 from createspot import CreateSpotHandler
 
 def responseWithError(out, errorMessage):
@@ -80,12 +81,15 @@ class LoginHandler(webapp.RequestHandler):
         self.response.headers['Content-Type'] = 'application/json; charset=utf-8'
         self.response.out.write(simplejson.dumps(response))
 
-        
-#protocol 0003
+class LogoutHandler(webapp.RequestHandler):
+    def post(self):
+        self.response.out.write('TODO')
+
+
 class CheckinHandler(webapp.RequestHandler):
 
     '''
-    url:<app-url>/get-post-list
+    url:<app-url>/checkin
     '''
     
     def post(self):
@@ -93,36 +97,29 @@ class CheckinHandler(webapp.RequestHandler):
         logging.info('CheckinHandler...')
         request = simplejson.loads(self.request.body)
         
+        talky_uid = int(request['talky_uid'])
+        spot_id   = int(request['spot_id'])
 
-        t_uid = request['talky_uid']
-
-        if t_uid == None:
-            responseWithError(self.response.out, 'talk_uid field is required')
-            return
-
-
-        spot_id = request['spot_id']
-        spotName = self.request.get('spot-name')
-
-        if spot_id == None:
-            responseWithError(self.response.out, 'spot_id is required')
-            return
-
-        checkin_times
-        date_time
+        user = TalkyUser.get_by_id(talky_uid)
+        spot = Spot.get_by_id(spot_id)
         
+        user.spot = spot.key()
+        user.put()
 
-        query = TalkyUser.all()
-        query.filter('userId = ', uid)
-        userAccount = query.get()
+        response = {
+            'success':True,
+            'checkin_times':1,
+            'user_list':[]
+        }
 
-        if userAccount == None:
-            userAccount = UserAccount(uid)
-            userAccount.put()
-            logging.info('Create an UserAccount for %s...', uid)
+        self.response.out.write(simplejson.dumps(response))
+        logging.info('CHECK-IN ... OK')
+
+
+class CheckoutHandler(webapp.RequestHandler):
+    def post(self):
+        self.response.out.write('TODO')
         
-
-
 
 class DeletePostsHandler(webapp.RequestHandler):
     def get(self):
@@ -137,79 +134,71 @@ class DeletePostsHandler(webapp.RequestHandler):
 
         self.response.out.write('Done')
 
+
 class GetPostHandler(webapp.RequestHandler):
 
+
     """
-
     Handle GetPostRequest, return posts in some spot.
-
     """
     def post(self):
         logging.info('GetPostHandler...')
 
         request = simplejson.loads(self.request.body)
-        
-        spotName = request['spot-name']
-        
-        logging.info('spotName = %s', spotName);
+        talky_uid = int(request['talky_uid'])
+        user = TalkyUser.get_by_id(talky_uid)
+        if user == None:
+            logging.info('user is None')
 
-        query = db.Query(UserPost)
+        logging.info(user.spot.name)
 
-        query.filter('spotName = ', spotName)
-        #TODO Time sorting
-        results = query.fetch(limit=10)
+        if user.spot == None:
+            logging.info('user.spot is None')
 
-        posts = []
+        query = UserPost.all()
+        query.filter('spotName = ', user.spot.name)
+        posts = query.fetch(limit = 10)
 
-        for result in results:
-            posts.append({'userId':result.userId, 'content':result.content})
-            
-        self.response.headers['Content-Type'] = 'application/json; charset=utf-8'
-        self.response.out.write(simplejson.dumps(posts))
+        response = {
+            'success':True,
+            'posts':[]
+        }
+
+        for post in posts:
+            postData = {
+                'owner':post.owner.fb_uid,
+                #'date_time':post.dateTime, <--- JSON can't serializable'
+                'content':post.content,
+            }
+            response['posts'].append(postData)
+        self.response.out.write(simplejson.dumps(response))
 
 
 class CreatePostHandler(webapp.RequestHandler):
     """
     Handle User post actions
-
     TODO : error handling
     """
 
     def post(self):
 
-        postDict = simplejson.loads(self.request.body)
+        logging.info('CreatePostHandler...')
+        request = simplejson.loads(self.request.body)
 
-        logging.info('Handling UserPost Request...')
-        
-        userId   = postDict['userId']
-        spotName = postDict['spotName']
-        content  = postDict['content']
+        talky_uid = int(request['talky_uid'])
+        user = TalkyUser.get_by_id(talky_uid)
 
-        logging.info('userId = %s', userId)
-        logging.info('spotName = %s', spotName)
-        logging.info('content  = %s', content)
+        content = request['content']
 
+        post = UserPost(content=content, owner=user, spot=user.spot.key())
+        post.spotName = user.spot.name;
+        key = post.put()
 
-        # Find Spot Model by name
-        spotQuery = db.Query(Spot)
-        spotQuery.filter("name =", spotName)
+        response = {
+            'success':True,
+            'post_id':key.id()
+        }
 
-        result = spotQuery.fetch(limit=1)
-
-        logging.info('result = %s', result)
-
-
-        # create a UserPost object
-        userPost = UserPost(userId=userId, spotName=spotName)
-        userPost.content = content
-        key = userPost.put()
-
-        spot = result[0]
-        spot.userPosts.append(key)
-        spot.put()
-
-        response = {'result':True}
-        
         self.response.headers['Content-Type'] = 'application/json; charset=utf-8'
         self.response.out.write(simplejson.dumps(response))
 
@@ -337,6 +326,10 @@ class Query_spot(webapp.RequestHandler):
 def main():
     sitemap=[('/',MainHandler),
              ('/login', LoginHandler), 
+             ('/logout', LogoutHandler),
+             ('/checkin', CheckinHandler),
+             ('/checkout', CheckoutHandler),
+             ('/get-post-list', GetPostHandler),
              ('/create-pic', CreateImageHandler), 
              ('/img', GetImageHandler),
              ('/spot',Record_spot),   
@@ -344,9 +337,7 @@ def main():
              ('/get-spot-list',Get_spot),
              ('/create-spot', CreateSpotHandler),
              ('/create-post', CreatePostHandler),
-             ('/get-post-list', GetPostHandler),
-             ('/del-posts', DeletePostsHandler),
-             ('/check-in', CheckinHandler)]
+             ('/del-posts', DeletePostsHandler)]
     
     application = webapp.WSGIApplication(sitemap,debug=True)
 

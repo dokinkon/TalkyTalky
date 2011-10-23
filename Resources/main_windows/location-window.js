@@ -151,17 +151,30 @@ currentWindow.add(statusLabel);
 
 currentWindow.add(spotTableView);
 
+
+
+
 spotTableView.addEventListener('click', function(e) {
 
     // Save current Spot to App.Properties
-    Ti.App.Properties.setString('current-spot', e.rowData.title);
+    Ti.App.Properties.setString('spot_name', e.rowData.name);
+    Ti.App.Properties.setString('spot_id'  , e.rowData.id);
 
-    var win = Ti.UI.createWindow({
-        url:'spot-window.js',
-        title:e.rowData.title,
+    Talky.checkin({
+        onsuccess:function() {
+            Ti.API.info('checkin successful.');
+            var win = Ti.UI.createWindow({
+                url:'spot-window.js',
+                title:e.rowData.title,
+            });
+            Ti.UI.currentTab.open(win, {animated:true});
+        },
+        onerror:function() {
+            // TODO
+        },
     });
 
-    Ti.UI.currentTab.open(win, {animated:true});
+
 });
 
 
@@ -188,6 +201,7 @@ var onSpotsAvailable = function(spots) {
         {
             title:spots[i].name,
             id:spots[i].id,
+            name:spots[i].name,
             hasChild:true,
         };
     }
@@ -230,7 +244,7 @@ var onLocationAvailable = function(e) {
 
     var xhr = Ti.Network.createHTTPClient();
 
-    xhr.open('POST', Talky.getSpotURL, true);
+    xhr.open('POST', Talky.getSpotURL(), true);
     xhr.setRequestHeader("Content-type", "application/json");
     xhr.setTimeout(1000);
 
@@ -257,8 +271,8 @@ var onLocationAvailable = function(e) {
         alert(e.error);
 
     };
-    Ti.API.info(Talky.getSpotURL);
-    Ti.API.info(JSON.stringify(data));
+    //Ti.API.info(Talky.getSpotURL());
+    //Ti.API.info(JSON.stringify(data));
     xhr.send(JSON.stringify(data));
 }
 
@@ -285,7 +299,6 @@ currentWindow.add(searchBar);
 var requestGeolocation = function() {
 
     //activityIndicator.show();
-
 
     if (Ti.Geolocation.locationServicesEnabled === false)
     {

@@ -42,28 +42,33 @@ shareButton.addEventListener('click', function(){
         return;
     }
 
-    var client = Ti.Network.createHTTPClient();
+    var xhr = Ti.Network.createHTTPClient();
 
-    var data = {"userId":Ti.Facebook.uid,"spotName":currentWindow.title, "content":textArea.value};
-    var body = JSON.stringify(data);
-
-    client.open('POST', Talky.createPostURL, true);
-    client.setRequestHeader("Content-type", "application/json");
-
-    client.onload = function() {
-        Ti.API.info('response = ' + client.responseText);
-        var result = JSON.parse(client.responseText);
-        // TODO: parse result from GAE server
-
-        requestPosts();
+    var requestData = 
+    {
+        "talky_uid":Ti.App.Properties.getString('talky_uid'),
+        "content":textArea.value
     };
 
+    xhr.open('POST', Talky.createPostURL(), true);
+    xhr.setRequestHeader("Content-type", "application/json");
 
-    client.onerror = function(e) {
+    xhr.onload = function() {
+        Ti.API.info('response = ' + xhr.responseText);
+        var response = JSON.parse(xhr.responseText);
+        if (!response.success) {
+            alert(response.error);
+            return;
+        }
+        //requestPosts();
+        Ti.API.info('CreatePostSuccessful');
+    };
+
+    xhr.onerror = function(e) {
         alert(e.error);
     };
 
-    client.send(body);
+    xhr.send(JSON.stringify(requestData));
 });
 
 
@@ -85,7 +90,7 @@ var createTableViewRow = function(post) {
     });
 
 
-    var uid = post.userId;
+    var uid = post.owner;
     Ti.API.info("createTableViewRow, uid = " + uid);
     var query = "SELECT pic_square, name FROM user ";
     query += "WHERE uid = " + uid;
@@ -142,35 +147,11 @@ var onPostsAvailable = function(posts) {
 
 
 
-
-var requestPosts = function() {
-
-    var client = Ti.Network.createHTTPClient();
-
-    var data = {"spot-name":currentWindow.title};
-    var body = JSON.stringify(data);
-
-    client.open('POST', Talky.getPostsURL, true);
-    client.setRequestHeader("Content-type", "application/json");
-    //client.setRequestHeader("Content-length", body.length);
-
-    client.onload = function() {
-        
-        Ti.API.info('requestPosts:response = ' + client.responseText);
-        var posts = JSON.parse(client.responseText);
-        onPostsAvailable(posts);
-    };
-
-    client.onerror = function(e) {
-        alert(e.error);
-    };
-
-    client.send(body);
-
-}
-
 currentWindow.addEventListener('open', function(e){
-    requestPosts();
+
+    Talky.requestPosts({
+        onPostsAvailable:onPostsAvailable,
+    });
 });
 
 

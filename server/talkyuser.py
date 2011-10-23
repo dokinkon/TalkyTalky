@@ -28,3 +28,22 @@ class TalkyUser(db.Model):
     #TODO
     #User Pereference...
 
+    def getSpot(self):
+        #return Spot.get(self.spot)
+        return self.spot
+
+    def __str__(self):
+        out = "TalkyUser = ["
+        out = out + 'fb_uid:' + self.fb_uid
+
+        if self.spot == None:
+            out = out + 'spot:None'
+        else:
+            out = out + 'spot:hasValue'
+
+        out = out + ']'
+        return out
+
+
+
+

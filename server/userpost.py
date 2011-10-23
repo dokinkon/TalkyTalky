@@ -4,13 +4,23 @@ from talkyuser import TalkyUser
 from spot import Spot
 
 
-class UserPost(db.Model):
-    #Has one to many relation?
+class TestModel(db.Model):
+    time = db.DateTimeProperty(auto_now_add=True)
 
-    owner    = db.ReferenceProperty(reference_class=TalkyUser, collection_name='posts')
+
+class UserPost(db.Model):
+
+    owner    = db.ReferenceProperty(TalkyUser, collection_name='posts')
     dateTime = db.DateTimeProperty(auto_now_add=True)
     content  = db.StringProperty(multiline=True) 
-    spot = db.ReferenceProperty(reference_class=Spot, collection_name='posts')
+    spot    = db.ReferenceProperty(reference_class=Spot, collection_name='posts')
+
+    '''
+    I have no idea why Spot doesn't have posts property?
+    This problem waste one all day.
+    So I decided add a spotName temporally for later query.
+    '''
+    spotName = db.StringProperty()
 
     image = db.BlobProperty()
    

@@ -18,11 +18,26 @@ var Talky = {
         return Talky.appURLForAppleEmu;
     },
     loginURL:function() {
-        return Talky.appURL()+'/login';
+        return Talky.appURL() +'/login';
     },
-    getSpotURL:'http://10.0.2.2:8084/get-spot-list',
-    createPostURL:'http://10.0.2.2:8084/create-post',
-    getPostsURL:'http://10.0.2.2:8084/get-post-list',
+    logout:function() {
+        return Talky.appURL() +'/logout';
+    },
+    checkinURL:function() {
+        return Talky.appURL() + '/checkin';
+    },
+    checkoutURL:function() {
+        return Talky.appURL() + '/checkout';
+    },
+    getSpotURL:function() {
+        return Talky.appURL() +'/get-spot-list';
+    },
+    createPostURL:function() {
+        return Talky.appURL() + '/create-post';
+    },
+    getPostsURL:function() {
+        return Talky.appURL() + '/get-post-list';
+    },
     sendImageURL:'http://10.0.2.2:8084/send-image',
     locationTabIndex:0,
 };
@@ -34,6 +49,11 @@ Ti.App.SCREEN_WIDTH  = (width > height) ? height : width;
 Ti.App.SCREEN_HEIGHT = (width > height) ? width : height;
 
 
+
+/**
+ * PROTOCOL - 0001
+ *
+ **/
 Talky.login = function(callback) {
 
     var xhr = Ti.Network.createHTTPClient();
@@ -43,7 +63,7 @@ Talky.login = function(callback) {
         fb_uid:Ti.Facebook.uid
     };
 
-    Ti.API.info('loginURL = ' + Talky.loginURL());
+    //Ti.API.info('loginURL = ' + Talky.loginURL());
 
     xhr.open('POST', Talky.loginURL(), true);
     xhr.setRequestHeader("Content-type", "application/json");
@@ -73,6 +93,87 @@ Talky.login = function(callback) {
 }
 
 
+
+Talky.checkin = function(handler) {
+
+    var requestData = 
+    {
+        talky_uid :Ti.App.Properties.getString('talky_uid'),
+        spot_id   :Ti.App.Properties.getString('spot_id'),
+    };
+
+    var xhr = Ti.Network.createHTTPClient();
+
+    xhr.open('POST', Talky.checkinURL(), true);
+    xhr.setRequestHeader("Content-type", "application/json");
+    xhr.setTimeout(1000);
+
+    xhr.onload = function() {
+
+        //Ti.API.info('response = ' + xhr.responseText);
+        var response = JSON.parse(xhr.responseText);
+
+        if (!response.success) {
+            alert(response.error);
+            return;
+        } else {
+
+            Ti.App.Properties.setBool('checkin', true);
+            if (handler.onsuccess && typeof handler.onsuccess === 'function') {
+                handler.onsuccess();
+            }
+            //Ti.API.info('login Talky successful. Talky-id is ' + response.talky_uid);
+        }
+    };
+
+    xhr.onerror = function(e){
+        alert(e.error);
+    };
+
+    //Ti.API.info(JSON.stringify(data));
+    xhr.send(JSON.stringify(requestData));
+}
+
+
+
+
+
+/**
+ *
+ */
+Talky.requestPosts = function(callbacks) {
+
+    var requestData =
+    {
+        talky_uid : Ti.App.Properties.getString('talky_uid'),
+    };
+
+    var xhr = Ti.Network.createHTTPClient();
+    xhr.open('POST', Talky.getPostsURL(), true);
+    xhr.setRequestHeader("Content-type", "application/json");
+
+    xhr.onload = function() {
+        Ti.API.info('requestPosts:response = ' + xhr.responseText);
+        var response = JSON.parse(xhr.responseText);
+        if (!response.success)
+        {
+            alert(response.error);
+            return;
+        }
+
+        if (callbacks.onPostsAvailable && typeof callbacks.onPostsAvailable === 'function')
+        {
+            callbacks.onPostsAvailable(response.posts);
+        }
+    };
+
+    xhr.onerror = function(e) {
+        alert(e.error);
+    };
+
+    Ti.API.info(JSON.stringify(requestData));
+    xhr.send(JSON.stringify(requestData));
+}
 
 
 

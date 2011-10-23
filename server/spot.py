@@ -30,11 +30,18 @@ class Spot(db.Model):
   geoboxes = db.StringListProperty()
 
   """
-  implicity properties
+  implicity virtual properties, as an instance of Query
   users:<collection of TalkyUser>
   posts:<collection of UserPost>
 
   """ 
+
+
+  def __str__(self):
+      out = 'Spot = ['
+      out = out + 'name:' + self.name
+      out = out + ']'
+      return out
     
 
 
@@ -86,12 +93,12 @@ class Spot(db.Model):
 
       resolution, slice, unused = params
       box = geobox.compute(lat, lon, resolution, slice)
-      logging.info("Searching for box=%s at resolution=%s, slice=%s",
-                    box, resolution, slice)
+      #logging.info("Searching for box=%s at resolution=%s, slice=%s",
+                    #box, resolution, slice)
       query = self.all().filter("geoboxes =", box)
       #results spot objs
       results = query.fetch(50)
-      logging.info("Found %d results", len(results))
+      #logging.info("Found %d results", len(results))
 
       # De-dupe results.
       for result in results:
