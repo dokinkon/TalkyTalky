@@ -24,15 +24,11 @@ from django.utils import simplejson
 import logging
 import json
 
-
 from spot import Spot
-from userpost import UserPost
 from useraccount import UserAccount
-
 from talkyuser import TalkyUser
 
-from django.utils import simplejson
-
+from userpost import UserPost
 from createspot import CreateSpotHandler
 
 def responseWithError(out, errorMessage):
@@ -91,22 +87,34 @@ class LoginHandler(webapp.RequestHandler):
 class CheckinHandler(webapp.RequestHandler):
 
     '''
-    http:<app-url>/check-in?uid=<facebook uid>&where=<spot-name>
+    url:<app-url>/get-post-list
     '''
-    def get(self):
-        uid = self.request.get('uid')
+    
+    def post(self):
+        
+        logging.info('CheckinHandler...')
+        request = simplejson.loads(self.request.body)
+        
 
-        if uid == None:
-            responseWithError(self.response.out, 'uid field is required')
+        t_uid = request['talky_uid']
+
+        if t_uid == None:
+            responseWithError(self.response.out, 'talk_uid field is required')
             return
 
+
+        spot_id = request['spot_id']
         spotName = self.request.get('spot-name')
 
-        if spotName == None:
-            responseWithError(self.response.out, 'spot-name is required')
+        if spot_id == None:
+            responseWithError(self.response.out, 'spot_id is required')
             return
 
-        query = UserAccount.all()
+        checkin_times
+        date_time
+        
+
+        query = TalkyUser.all()
         query.filter('userId = ', uid)
         userAccount = query.get()
 
