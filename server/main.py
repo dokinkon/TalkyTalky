@@ -69,9 +69,7 @@ class LoginHandler(webapp.RequestHandler):
 
         if userAccount == None:
             logging.info('get result')
-            #userAccount = TalkyUser(uid)
-            userAccount = TalkyUser()
-            userAccount.fb_uid = uid
+            userAccount = TalkyUser(fb_uid = uid)
             userAccount.put()
             logging.info('Create an UserAccoun TalkyUser for fb_string %s...', uid)
         key = userAccount.key()

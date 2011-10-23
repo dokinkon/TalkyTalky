@@ -4,7 +4,14 @@ from spot import Spot
 
 
 class TalkyUser(db.Model):
-    #Facebook fb-id
+
+    """
+    How to use:
+        user = TalkyUser(fb_uid = uid)
+        user.put()
+    """
+
+    #Facebook user id
     fb_uid = db.StringProperty()
 
     #Indicate where am I
@@ -21,10 +28,3 @@ class TalkyUser(db.Model):
     #TODO
     #User Pereference...
 
-    #def __init__(self):
-        #self.fb_uid = 'unknown fb-uid'
-
-    #def __init__(self, fb_uid):
-        #self.fb_uid = fb_uid
-    def get_fb_id(fb_self):
-        return self.fb_uid
