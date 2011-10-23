@@ -43,6 +43,16 @@ var versionLabel = Ti.UI.createLabel({
 currentWindow.add(versionLabel);
 
 
+Ti.Facebook.addEventListener('login', function(e) {
+
+    if (e.success) {
+        Ti.API.info('login Facebook successful');
+        Talky.login();
+    }
+    else {
+        alert(e.error);
+    }
+});
 
 // 1. check network connection status.
 // 2. request user login to FB
@@ -54,11 +64,16 @@ currentWindow.addEventListener('open', function(e){
         return;
     }
 
-    // Login the user and authorize our app
-    Ti.Facebook.authorize();
-    Talky.login();
-
+    if (Ti.Facebook.loggedIn) {
+        Talky.login();
+    }
+    else {
+        // Login the user and authorize our app
+        Ti.Facebook.authorize();
+    }
 });
+
+
 
 
 // TODO
