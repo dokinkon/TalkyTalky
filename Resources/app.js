@@ -24,6 +24,7 @@ var mainWindow = Ti.UI.createWindow({
 
 
 var mainTab = Ti.UI.createTab({
+    icon:'images/home.png',
     title:'首頁',
     window:mainWindow
 });

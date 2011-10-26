@@ -38,6 +38,9 @@ var Talky = {
     getPostsURL:function() {
         return Talky.appURL() + '/get-post-list';
     },
+    sendReplyURL:function() {
+        return Talky.appURL() + '/reply';
+    },
     sendImageURL:'http://10.0.2.2:8084/send-image',
     locationTabIndex:0,
 };
@@ -171,13 +174,58 @@ Talky.requestPosts = function(callbacks) {
         alert(e.error);
     };
 
-    Ti.API.info(JSON.stringify(requestData));
+    //Ti.API.info(JSON.stringify(requestData));
     xhr.send(JSON.stringify(requestData));
 }
 
 
+/**
+ * args = {
+ *  content:<content>,
+ *  post_id:<post id>
+ *  onReplySuccess:<a callback>
+ * }
+ *
+ *
+ *
+ */
+Talky.sendReply = function(args) {
+
+    var requestData = {
+        talky_uid:Ti.App.Properties.getString('talky_uid'),
+        post_id:args.post_id,
+        content:args.content,
+        anonymous:false,
+    };
+
+    var xhr = Ti.Network.createHTTPClient();
+    xhr.open('POST', Talky.sendReplyURL(), true);
+    xhr.setRequestHeader("Content-type", "application/json");
+
+    xhr.onload = function() {
+        Ti.API.info('sendReply:response = ' + xhr.responseText);
+        var response = JSON.parse(xhr.responseText);
+        if (!response.success)
+        {
+            alert(response.error);
+            return;
+        }
+
+        if (args.onReplySuccess && typeof args.onReplySuccess === 'function')
+        {
+            args.onReplySuccess(content);
+        }
+    };
+
+    xhr.onerror = function(e) {
+        alert(e.error);
+    };
+
+    Ti.API.info('send = '+JSON.stringify(requestData));
+    xhr.send(JSON.stringify(requestData));
 
 
+};
 
 
 

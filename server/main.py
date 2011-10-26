@@ -27,9 +27,9 @@ import json
 from spot import Spot
 from useraccount import UserAccount
 from talkyuser import TalkyUser
+from postreply import PostReply
 
 from userpost import UserPost
-from userpost import TestModel
 from createspot import CreateSpotHandler
 
 def responseWithError(out, errorMessage):
@@ -165,8 +165,17 @@ class GetPostHandler(webapp.RequestHandler):
         }
 
         for post in posts:
+
+            logging.info("datetime.year = %s", post.dateTime.year)
+            logging.info("datetime.month = %s", post.dateTime.month)
+            logging.info("datetime.date = %s", post.dateTime.day)
+            logging.info("datetime.hour = %s", post.dateTime.hour)
+            logging.info("datetime.minute = %s", post.dateTime.minute)
+            logging.info("datetime.second = %s", post.dateTime.second)
+
             postData = {
                 'owner':post.owner.fb_uid,
+                'id':post.key().id(),
                 #'date_time':post.dateTime, <--- JSON can't serializable'
                 'content':post.content,
             }
@@ -218,6 +227,41 @@ class GetImageHandler(webapp.RequestHandler):
         if pic.picture:  
             self.response.headers['Content-Type'] = "image/png" 
             self.response.out.write(obj.picture)   
+
+
+
+
+
+class SendReplyHandler(webapp.RequestHandler):
+    '''
+    I did a very simple handler.
+    Need more error handling
+    '''
+    def post(self):
+        logging.info('SendReplyHandler...')
+        request = simplejson.loads(self.request.body)
+        userId = int(request['talky_uid'])
+        postId = int(request['post_id'])
+        content = request['content']
+
+        owner = TalkyUser.get_by_id(userId)
+        post = UserPost.get_by_id(postId)
+
+        postReply = PostReply(owner=owner, post=post, content=content)
+        key = postReply.put()
+
+        response = {
+            'success':True,
+            'reply_id':key.id()
+        }
+        self.response.headers['Content-Type'] = 'application/json; charset=utf-8'
+        self.response.out.write(simplejson.dumps(response))
+
+        logging.info('DONE')
+
+
+
+
 
         
 class CreateImageHandler(webapp.RequestHandler):
@@ -329,6 +373,7 @@ def main():
              ('/logout', LogoutHandler),
              ('/checkin', CheckinHandler),
              ('/checkout', CheckoutHandler),
+             ('/reply', SendReplyHandler),
              ('/get-post-list', GetPostHandler),
              ('/create-pic', CreateImageHandler), 
              ('/img', GetImageHandler),
