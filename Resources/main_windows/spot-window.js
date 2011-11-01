@@ -12,15 +12,14 @@ Ti.include('spot-window-layout.js');
 var currentWindow = Ti.UI.currentWindow;
 currentWindow.backgroundColor = '#fff';
 
-
-
-
-
-
-
-
-
-
+var takePhotoButton = Ti.UI.createButton({
+    top:3,
+    left:3,
+    height:40,
+    width:40,
+    backgroundImage:'/images/take-photo.png',
+});
+currentWindow.add(takePhotoButton);
 
 
 var textArea = Titanium.UI.createTextArea(
@@ -180,9 +179,8 @@ var createTableViewRow = function(post) {
 
     var tvRow = Ti.UI.createTableViewRow({
         height:'auto',
-        backgroundColor:'#fff'
+        backgroundColor:'#FFF'
     });
-
 
     var uid = post.owner;
     Ti.API.info("createTableViewRow, uid = " + uid);

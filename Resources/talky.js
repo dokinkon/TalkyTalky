@@ -13,9 +13,9 @@ var Talky = {
     appURLForAndroidEmu:'http://10.0.2.2:8084',
     appURLForAppleEmu:'http://127.0.0.1:8084',
     appURL:function() {
-        //return 'http://lets-talky-talky.appspot.com';
+        return 'http://lets-talky-talky.appspot.com';
         //return Talky.appURLForAndroidEmu
-        return Talky.appURLForAppleEmu;
+        //return Talky.appURLForAppleEmu;
     },
     loginURL:function() {
         return Talky.appURL() +'/login';

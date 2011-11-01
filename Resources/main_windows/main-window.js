@@ -15,29 +15,87 @@ var fbButton = Ti.Facebook.createLoginButton({
 
 currentWindow.add(fbButton);
 
-var tableViewData = 
-[
-    {title:'熱門看板', hasChild:true},
-    {title:'我的最愛', hasChild:true},
-    {title:'設定'    , hasChild:true},
-    {title:'關於'    , hasChild:true},
-];
 
-var tableView = Ti.UI.createTableView({
-    data:tableViewData,
-    bottom:60,
+// Create Here Button
+var hereButton = Ti.UI.createButton({
+    top:'10%',
+    width:60,
+    height:60,
+    backgroundImage:'../images/here.png',
+    backgroundSelectedImage:'../images/here-pressed.png',
 });
 
-currentWindow.add(tableView);
+currentWindow.add(hereButton);
 
+var optionButton = Ti.UI.createButton({
+    top:'30%',
+    right:'10%',
+    width:60,
+    height:60,
+    backgroundImage:'../images/option.png',
+    backgroundSelectedImage:'../images/option-pressed.png',
 
+});
+currentWindow.add(optionButton);
 
+var aboutMeButton = Ti.UI.createButton({
+    top:'50%',
+    right:'10%',
+    width:60,
+    height:60,
+    backgroundImage:'../images/about-me.png',
+    backgroundSelectedImage:'../images/about-me-pressed.png',
+});
+currentWindow.add(aboutMeButton);
+
+var beautyMapButton = Ti.UI.createButton({
+    top:'30%',
+    left:'10%',
+    width:60,
+    height:60,
+    backgroundImage:'../images/beauty-map.png',
+    backgroundSelectedImage:'../images/beauty-map-pressed.png',
+});
+currentWindow.add(beautyMapButton);
+
+var favoriteButton = Ti.UI.createButton({
+    top:'50%',
+    left:'10%',
+    width:60,
+    height:60,
+    backgroundImage:'../images/favorite.png',
+    backgroundSelectedImage:'../images/favorite-pressed.png',
+});
+currentWindow.add(favoriteButton);
+
+var mailBoxButton = Ti.UI.createButton({
+    top:'70%',
+    left:'25%',
+    width:60,
+    height:60,
+    backgroundImage:'../images/mail-box.png',
+    backgroundSelectedImage:'../images/mail-box-pressed.png',
+});
+currentWindow.add(mailBoxButton);
+
+var responseButton = Ti.UI.createButton({
+    top:'70%',
+    right:'25%',
+    width:60,
+    height:60,
+    backgroundImage:'../images/response.png',
+    backgroundSelectedImage:'../images/response-pressed.png',
+});
+currentWindow.add(responseButton);
 
 
 var versionLabel = Ti.UI.createLabel({
-    top:10,
-    left:10,
-    text:'version: ' + Talky.version,
+    bottom:'2%',
+    right:'2%',
+    height:20,
+    width:64,
+    backgroundColor:'#FFF',
+    text:Talky.version,
 });
 
 currentWindow.add(versionLabel);

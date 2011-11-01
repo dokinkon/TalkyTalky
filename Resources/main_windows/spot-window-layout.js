@@ -8,11 +8,11 @@ var Layout480x320 =
     {
         editable: true,
         value:'想說什麼嗎？',
-        height:50,
+        height:'10%',
         width:200,
-        top:10,
-        left:10,
-        font:{fontSize:20,fontFamily:'Marker Felt', fontWeight:'bold'},
+        top:3,
+        left:55,
+        font:{fontSize:16,fontFamily:'Marker Felt',},
         color:'#888',
         textAlign:'left',
         appearance:Titanium.UI.KEYBOARD_APPEARANCE_ALERT,	
@@ -26,39 +26,41 @@ var Layout480x320 =
     submitButton:
     {
         title:"分享",
-        height:50,
-        width:90,
-        top:10,
-        left:220,
+        height:'10%',
+        width:60,
+        top:'1%',
+        right:'1%',
     },
     postTableView:
     {
         allowsselection:false,
-        height:240,
-        top:70,
+        backgroundColor:'#FFF',
+        top:60,
+        bottom:0,
     },
     postContent:
     {
         editable:false,
-        left:60,
-        top:30,
+        left:50,
+        top:25,
         height:50,
+        backgroundColor:'#FFF',
     },
     nameLabel:
     {
-        font:{fontSize:16, fontWeight:'bold'},
-        left:70,
-        top:5,
-        right:5,
+        font:{fontSize:12, fontWeight:'bold'},
+        left:50,
+        width:100,
+        top:3,
         height:20,
         color:'#576996',
     },
     userPhoto:
     {
-        left:10,
-        width:50,
-        height:50,
-        top:10,
+        top:3,
+        left:3,
+        width:40,
+        height:40,
     },
 }
 

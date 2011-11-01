@@ -99,7 +99,19 @@ if (Ti.Platform.name == 'android') {
 
 
 
-var spotData = [];
+//var spotData = [];
+//
+//Fake Data..
+var spotData = [
+    {title:'台大校門', hasChild:true},
+    {title:'圖書館', hasChild:true},
+    {title:'第一學生活動中心', hasChild:true},
+    {title:'綜合教學館', hasChild:true},
+    {title:'圖書資訊館', hasChild:true},
+    {title:'土木系館', hasChild:true},
+    {title:'化學工程館', hasChild:true},
+];
+
 
 /**
  * Create a tableView to contain spots
@@ -112,6 +124,8 @@ var spotTableView = Ti.UI.createTableView({
     height:Layout.spotTableView.height,
     top:Layout.spotTableView.top,
 });
+
+spotTableView.setData(spotData);
 
 var latitudeLabel = Ti.UI.createLabel({
     text:'latitude',
@@ -197,6 +211,13 @@ var onSpotsAvailable = function(spots) {
     statusLabel.text = 'Spots Available Now';
 
     for (var i=0;i<spots.length;i+=1){
+        spotData.push({
+            title:spots[i].name,
+            id:spots[i].id,
+            name:spots[i].name,
+            hasChild:true,
+        });
+        /*
         spotData[i] = 
         {
             title:spots[i].name,
@@ -204,6 +225,7 @@ var onSpotsAvailable = function(spots) {
             name:spots[i].name,
             hasChild:true,
         };
+        */
     }
 
     spotTableView.setData(spotData);
@@ -343,6 +365,7 @@ currentWindow.addEventListener('open', function() {
     requestGeolocation();
 });
 
+/*
 var relocationButtion = Ti.UI.createButton({
     title:'重新定位',
     top:300,
@@ -351,7 +374,8 @@ var relocationButtion = Ti.UI.createButton({
 });
 
 currentWindow.add(relocationButtion);
-relocationButtion.addEventListener('click', requestGeolocation);
+*/
+//relocationButtion.addEventListener('click', requestGeolocation);
 
 
 

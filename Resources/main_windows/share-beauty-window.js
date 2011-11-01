@@ -12,47 +12,6 @@ Ti.App.addEventListener('spotChanged', function(e){
 
 var currentWindow = Ti.UI.currentWindow;
 
-var qmoButton = Titanium.UI.createButton({
-	title : 'V-Bottom',
-    backgroundImage: '../icons/qmo.png',
-	width : 50,
-	height: 40,
-	top : 50,
-	left : 10
-});
-
-currentWindow.add(qmoButton);
-
-var shortHairButton = Ti.UI.createButton({
-    backgroundImage: '../icons/shorthair.png',
-    width:74,
-    height:60,
-    top:50,
-    left:70
-});
-
-currentWindow.add(shortHairButton);
-
-var longHairButton = Ti.UI.createButton({
-    backgroundImage:'../icons/longhair.png',
-    width:74,
-    height:60,
-    top:50,
-    left:144,
-});
-
-currentWindow.add(longHairButton);
-
-var horseTailButton = Ti.UI.createButton({
-    backgroundImage:'../icons/horsetail.png',
-    width:74,
-    height:60,
-    top:50,
-    left:218
-});
-
-currentWindow.add(horseTailButton);
-
 
 
 currentWindow.addEventListener('focus', function(e){
@@ -65,76 +24,191 @@ currentWindow.addEventListener('focus', function(e){
 // 
 // Add hairstyle buttons
 //
-var longhairButton = Ti.UI.createButton({
-    backgroundImage:'icons/longhair.png',
-    top:50,
-    left:10
+
+
+
+// Scrollable View
+var scrollableView = Ti.UI.createScrollableView({
+    top:'50%',
+    width:'100%',
+    bottom:"0",
+    height:'50%',
+    backgroundColor:'#AAA',
 });
 
-currentWindow.add(longhairButton);
+currentWindow.add(scrollableView);
 
-var textArea = Titanium.UI.createTextArea({
-	editable: true,
-	value:'I am a textarea',
-	height:150,
-	width:300,
-	top:100,
-	font:{fontSize:20,fontFamily:'Marker Felt', fontWeight:'bold'},
-	color:'#888',
-	textAlign:'left',
-	appearance:Titanium.UI.KEYBOARD_APPEARANCE_ALERT,	
-	keyboardType:Titanium.UI.KEYBOARD_NUMBERS_PUNCTUATION,
-	returnKeyType:Titanium.UI.RETURNKEY_EMERGENCY_CALL,
-	borderWidth:2,
-	borderColor:'#bbb',
-	borderRadius:5,
-	suppressReturn:false
-});
+var initHairStyleView = function () {
 
-currentWindow.add(textArea);
+    var hairStyleView = Ti.UI.createView({
+        widht:'100%',
+        height:'100%',
+    });
 
-var submitButton = Ti.UI.createButton({
-    title:'Submit',
-    top:300,
-    width:100,
-    left:30
-});
+    var qmoButton = Titanium.UI.createButton({
+        backgroundImage: '../images/qmo.png',
+        top:0,
+        width:75,
+        height:60,
+        left:'0%',
+    });
 
-currentWindow.add(submitButton);
+    hairStyleView.add(qmoButton);
 
-submitButton.addEventListener('click', function(e){
-    Ti.API.info("SubmitButton Pressed");
-    Ti.API.info("Talky.spotName = " + Talky.spotName);
+    var shortHairButton = Ti.UI.createButton({
+        backgroundImage: '../images/shorthair.png',
+        top:0,
+        width:75,
+        height:60,
+        left:'25%',
+    });
+    hairStyleView.add(shortHairButton);
 
-    Ti.App.fireEvent('querySpotName', {});
+    var horseTailButton = Ti.UI.createButton({
+        backgroundImage:'../images/horsetail.png',
+        title:'馬尾',
+        width:75,
+        height:60,
+        top:0,
+        left:'50%',
+    });
+    hairStyleView.add(horseTailButton);
+
+    var longHairButton = Ti.UI.createButton({
+        backgroundImage:'../images/longhair.png',
+        top:0,
+        left:'75%',
+        width:75,
+        height:60,
+    });
+    hairStyleView.add(longHairButton);
+    longHairButton.addEventListener('click', function(){
+        scrollableView.scrollToView(1);
+
+    });
+
+    scrollableView.addView(hairStyleView);
+};
 
 
-    var value = textArea.value;
+var initDescribeDressingView = function() {
 
-    //var client = Ti.Network.HTTP
+    var describeDressingView = Ti.UI.createView({
+        width:'100%',
+        height:'100%',
+    });
 
-    var client = Ti.Network.createHTTPClient();
+    var textArea = Ti.UI.createTextArea({
+        left:10,
+        height:40,
+        width:250,
+        backgroundColor:'#FFF',
+        value:"請簡單描述穿著與確切位置",
+    });
+    describeDressingView.add(textArea);
 
-    //var data = {"spotName":Talky.spotName, "content":textArea.value};
-    var data = {"spotName":"department-store", "content":textArea.value};
-    var body = JSON.stringify(data);
+    var button = Ti.UI.createButton({
+        title:'確定',
+        right:10,
+        width:40,
+        height:40,
+    });
+    describeDressingView.add(button);
+    button.addEventListener('click', function(){
+        scrollableView.scrollToView(2);
+    });
+    scrollableView.addView(describeDressingView);
+};
 
-    client.open('POST', Talky.createPostURL, true);
-    client.setRequestHeader("Content-type", "application/json");
-    client.setRequestHeader("Content-length", body.length);
+var initDescribeStyleView = function() {
 
-    client.onreadystatechange = function() {
-        
-        if (client.readyState==4 && client.status == 200)
-        {
-            Ti.API.info('response = ' + client.responseText);
-            var result = JSON.parse(client.responseText);
-        }
-    };
+    var view = Ti.UI.createView({
+        width:'100%',
+        height:'100%',
+    });
 
-    client.send(body);
+    var button1 = Ti.UI.createButton({
+        title:'氣質高雅型',
+        width:'25%',
+        height:'25%',
+        center:{x:80, y:60},
+    });
+    var button2 = Ti.UI.createButton({
+        title:'性感豔麗型',
+        width:'25%',
+        height:'25%',
+        center:{x:240, y:60}
+    });
 
-});
+    var button3 = Ti.UI.createButton({
+        title:'可愛甜美型',
+        width:'25%',
+        height:'25%',
+        center:{x:80, y:120}
+    });
+    var button4 = Ti.UI.createButton({
+        title:'運動健康型',
+        width:'25%',
+        height:'25%',
+        center:{x:240, y:120},
+    });
+
+    view.add(button1);
+    view.add(button2);
+    view.add(button3);
+    view.add(button4);
+
+    button1.addEventListener('click', function(){
+        scrollableView.scrollToView(3);
+    });
+    button2.addEventListener('click', function(){
+        scrollableView.scrollToView(3);
+    });
+    
+    button3.addEventListener('click', function(){
+        scrollableView.scrollToView(3);
+    });
+    button4.addEventListener('click', function(){
+        scrollableView.scrollToView(3);
+    });
+    scrollableView.addView(view);
+};
+
+
+var initConclusionView = function() {
+
+    var view = Ti.UI.createView({
+        width:'100%',
+        height:'100%',
+    });
+    scrollableView.addView(view);
+
+    var textArea = Ti.UI.createTextArea({
+        left:10,
+        height:40,
+        width:250,
+        backgroundColor:'#FFF',
+        value:"然後你想說什麼?",
+    });
+    view.add(textArea);
+
+    var button = Ti.UI.createButton({
+        title:'分享',
+        right:10,
+        width:40,
+        height:40,
+    });
+    view.add(button);
+};
+
+
+initHairStyleView();
+initDescribeDressingView();
+initDescribeStyleView();
+initConclusionView();
+
+
+
 
 
 var postContent = function(photo, content) {
@@ -190,16 +264,22 @@ var postContent = function(photo, content) {
 
 // Open Media Gallery..., Since my IPod doesn't have camera, use image from gallery.
 
-var pickPhotoFromGallery = function() {
+var pickPhotoFromGallery = function(callbacks) {
 
-    Titanium.Media.openPhotoGallery({
-    //Ti.Media.openPhotoGallery({
+    Ti.Media.openPhotoGallery({
         success:function(e)
         {
             var image = e.media;
             if (e.mediaType == Ti.Media.MEDIA_TYPE_PHOTO)
             {
-                postContent(image, 'test');
+                Ti.API.info("1");
+                if (callbacks.onPickPhotoSuccess && typeof callbacks.onPickPhotoSuccess === 'function')
+                {
+                    Ti.API.info("2");
+                    callbacks.onPickPhotoSuccess(e.media);
+                }
+
+                //postContent(image, 'test');
             }
             else
             {
@@ -232,12 +312,26 @@ currentWindow.addEventListener('open', function(){
     dialog.addEventListener('click', function(e){
         if (e.index === 0) {
             Ti.API.info('Enable sharing with photo');
-            Talky.sharingWithPhoto = true;
-            pickPhotoFromGallery();
+            Ti.App.Properties.setBool('share-with-photo', true);
+            pickPhotoFromGallery({
+                onPickPhotoSuccess:function(photo) {
+                    Ti.API.info('w:' + photo.width);
+                    Ti.API.info('h:' + photo.height);
+
+                    var imageView = Ti.UI.createImageView({
+                        top:0,
+                        width:160,
+                        height:160,
+                        image:photo,
+                    });
+
+                    currentWindow.add(imageView);
+                },
+            });
         }
         else if (e.index === 1) {
             Ti.API.info('Disable sharing with photo');
-            Talky.sharingWithPhoto = false;
+            Ti.App.Properties.setBool('share-with-photo', false);
         }
     });
     dialog.show();
