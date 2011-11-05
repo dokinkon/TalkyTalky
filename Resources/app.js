@@ -1,6 +1,8 @@
 
 Ti.Facebook.appid = "280459581967624";
 Ti.Facebook.permissions = ['publish_stream', 'read_stream'];
+Ti.Geolocation.purpose = 'Talky-Talky';
+Ti.Geolocation.accuracy = Ti.Geolocation.ACCURACY_BEST;
 
 var talky = {}
 talky.version = "v0.0.1";
@@ -13,6 +15,7 @@ talky.app.version = Titanium.Platform.version;
 
 Ti.include('ui.js');
 Ti.include('service.js')
+Ti.include('data.js')
 //Ti.include('talky.js');
 
 

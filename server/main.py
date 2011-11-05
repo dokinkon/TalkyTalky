@@ -166,10 +166,10 @@ class GetPostHandler(webapp.RequestHandler):
 
         for post in posts:
 
-            logging.info("datetime.year = %s", post.dateTime.year)
-            logging.info("datetime.month = %s", post.dateTime.month)
-            logging.info("datetime.date = %s", post.dateTime.day)
-            logging.info("datetime.hour = %s", post.dateTime.hour)
+            logging.info("datetime.year = %s",   post.dateTime.year)
+            logging.info("datetime.month = %s",  post.dateTime.month)
+            logging.info("datetime.date = %s",   post.dateTime.day)
+            logging.info("datetime.hour = %s",   post.dateTime.hour)
             logging.info("datetime.minute = %s", post.dateTime.minute)
             logging.info("datetime.second = %s", post.dateTime.second)
 
@@ -180,6 +180,22 @@ class GetPostHandler(webapp.RequestHandler):
                 'content':post.content,
             }
             response['posts'].append(postData)
+        self.response.out.write(simplejson.dumps(response))
+
+
+class GetReplyListHandler(webapp.RequestHandler):
+    def post(self):
+        request = simplejson.loads(self.request.body)
+        talkyUId = request['talky_uid']
+        postId = request['post_id']
+
+        post = UserPost.get_by_id(postId)
+        response = {}
+        response['replies'] = []
+        for reply in post.replies:
+            response['replies'].append({'owner':reply.owner.fb_uid,'content':reply.content})
+
+        response['success'] = True
         self.response.out.write(simplejson.dumps(response))
 
 
@@ -375,6 +391,7 @@ def main():
              ('/checkout', CheckoutHandler),
              ('/reply', SendReplyHandler),
              ('/get-post-list', GetPostHandler),
+             ('/get-reply-list', GetReplyListHandler),
              ('/create-pic', CreateImageHandler), 
              ('/img', GetImageHandler),
              ('/spot',Record_spot),   
