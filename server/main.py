@@ -32,6 +32,18 @@ from postreply import PostReply
 from userpost import UserPost
 from createspot import CreateSpotHandler
 
+
+def serializeDateTime(datetime):
+    out = {
+        'year':datetime.year,
+        'month':datetime.month,
+        'date':datetime.day,
+        'hour':datetime.hour,
+        'minute':datetime.minute,
+        'second':datetime.second
+    }
+    return out;
+
 def responseWithError(out, errorMessage):
     response = {'success':False, 'error':errorMessage}
     out.write(simplejson.dumps(response))
@@ -165,18 +177,10 @@ class GetPostHandler(webapp.RequestHandler):
         }
 
         for post in posts:
-
-            logging.info("datetime.year = %s",   post.dateTime.year)
-            logging.info("datetime.month = %s",  post.dateTime.month)
-            logging.info("datetime.date = %s",   post.dateTime.day)
-            logging.info("datetime.hour = %s",   post.dateTime.hour)
-            logging.info("datetime.minute = %s", post.dateTime.minute)
-            logging.info("datetime.second = %s", post.dateTime.second)
-
             postData = {
                 'owner':post.owner.fb_uid,
                 'id':post.key().id(),
-                #'date_time':post.dateTime, <--- JSON can't serializable'
+                'date_time':serializeDateTime(post.dateTime),
                 'content':post.content,
             }
             response['posts'].append(postData)
@@ -193,7 +197,8 @@ class GetReplyListHandler(webapp.RequestHandler):
         response = {}
         response['replies'] = []
         for reply in post.replies:
-            response['replies'].append({'owner':reply.owner.fb_uid,'content':reply.content})
+            response['replies'].append(reply.toInterchangeable())
+            #response['replies'].append({'owner':reply.owner.fb_uid,'content':reply.content,'date_time':serializeDateTime(reply.dateTime)})
 
         response['success'] = True
         self.response.out.write(simplejson.dumps(response))

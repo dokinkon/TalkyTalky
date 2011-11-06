@@ -2,6 +2,7 @@
 from google.appengine.ext import db
 from talkyuser import TalkyUser
 from userpost import UserPost
+import utils
 
 
 class PostReply(db.Model):
@@ -10,6 +11,13 @@ class PostReply(db.Model):
     dateTime = db.DateTimeProperty(auto_now_add=True)
     content = db.StringProperty(multiline=True)
 
+    def toInterchangeable(self):
+        interchangeable = {
+            'id':self.key().id(),
+            'owner':self.owner.fb_uid,
+            'content':self.content,
+            'date_time':utils.dateTimeToInterchangeable(self.dateTime),
+        }
+        return interchangeable
 
-    #TODO : goods and bads
 

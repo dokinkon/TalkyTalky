@@ -2,6 +2,7 @@
 (function(){
 
     //Ti.include('data.js');
+    Ti.include('utils.js');
 
     // talky.service.login 
     // talky.service.checkin 
@@ -12,6 +13,7 @@
     // talky.service.sendReply
     // talky.service.requestGeolocation
     // talky.service.requestFBNameAndPhoto
+    // talky.service.pickImageFromDevice
 
     talky.service = {
         appURLForAndroidEmu:'http://10.0.2.2:8084',
@@ -42,6 +44,38 @@
         getReplyURL:function() {
             return talky.service.appURL() + '/get-reply-list';
         },
+    };
+
+
+
+    var generalRequest = function(requestURL, requestData, callbacks){
+
+        var xhr = Ti.Network.createHTTPClient();
+
+        xhr.open('POST', requestURL, true);
+        xhr.setRequestHeader("Content-type", "application/json");
+        xhr.setTimeout(1000);
+
+        xhr.onload = function() {
+
+            Ti.API.info('ResponseFrom:'+requestURL+', '+ xhr.responseText);
+            var response = JSON.parse(xhr.responseText);
+
+            if (response.success===true) {
+                if (callbacks.onsuccess && typeof callbacks.onsuccess) {
+                    callbacks.onsuccess(response);
+                }
+            } else {
+                alert(response.error);
+            }
+        };
+
+        xhr.onerror = function(e){
+            alert(e.error);
+        };
+
+        Ti.API.info('SendTo:'+ requestURL + ", " + JSON.stringify(requestData));
+        xhr.send(JSON.stringify(requestData));
     };
 
 
@@ -143,6 +177,10 @@
 
             if (response.success)
             {
+                for (var i=0;i<response.spots.length;i++) {
+                    talky.data.saveSpot(response.spots[i].id, response.spots[i]);
+                }
+
                 if (callbacks.onSpotListAvailable && typeof callbacks.onSpotListAvailable === 'function') {
                     callbacks.onSpotListAvailable(response.spots)
                 }
@@ -183,12 +221,16 @@
 
         xhr.onload = function() {
 
-            Ti.API.info('talky.service.requestReplyList, response = ' + xhr.responseText);
+            //Ti.API.info('talky.service.requestReplyList, response = ' + xhr.responseText);
 
             var response = JSON.parse(xhr.responseText);
 
             if (response.success)
             {
+                for (var i=0;i<response.replies.length;i++) {
+                    response.replies[i].date_time = talky.utils.dateFromInterchangeable(response.replies[i].date_time);
+                }
+
                 if (callbacks.onReplyListAvailable && typeof callbacks.onReplyListAvailable === 'function') {
                     callbacks.onReplyListAvailable(response.replies)
                 }
@@ -207,8 +249,7 @@
                 callbacks.onReplyListUnavailable(response.spots)
             }
         };
-        //Ti.API.info(Talky.getSpotURL());
-        Ti.API.info('talky.service.requestReplyList: send = '+JSON.stringify(requestData));
+        //Ti.API.info('talky.service.requestReplyList: send = '+JSON.stringify(requestData));
         xhr.send(JSON.stringify(requestData));
     };
 
@@ -250,7 +291,7 @@
         var xhr = Ti.Network.createHTTPClient();
 
         var requestData = {
-            "talky_uid":talky.data.getMyTalkyId(),//Ti.App.Properties.getString('talky_uid'),
+            "talky_uid":talky.data.getMyTalkyId(),
             "content":content,
         };
 
@@ -258,21 +299,24 @@
         xhr.setRequestHeader("Content-type", "application/json");
 
         xhr.onload = function() {
-            Ti.API.info('response = ' + xhr.responseText);
+            //Ti.API.info('talky.service.sendPost: response = ' + xhr.responseText);
             var response = JSON.parse(xhr.responseText);
             if (!response.success) {
                 alert(response.error);
                 return;
-            }
+            } else {
 
-            //Ti.API.info('CreatePostSuccessful');
+                if (callbacks.onsuccess && typeof callbacks.onsuccess ==='function') {
+                    callbacks.onsuccess(response.post_id);
+                }
+            }
         };
 
         xhr.onerror = function(e) {
             alert(e.error);
         };
 
-        Ti.API.info(JSON.stringify(requestData));
+        //Ti.API.info(JSON.stringify(requestData));
         xhr.send(JSON.stringify(requestData));
     };
 
@@ -280,12 +324,20 @@
     talky.service.sendReply = function(postId, content, callbacks) {
 
         var requestData = {
-            talky_uid:talky.data.getMyTalkyId(),//Ti.App.Properties.getString('talky_uid'),
+            talky_uid:talky.data.getMyTalkyId(),
             post_id:postId,
             content:content,
             anonymous:false,
         };
 
+        generalRequest(talky.service.sendReplyURL(), requestData,{onsuccess:function(response){
+            if (callbacks.onsuccess && typeof callbacks.onsuccess === 'function') {
+                callbacks.onsuccess(response.reply_id);
+            }
+            }, 
+        });
+
+        /*
         var xhr = Ti.Network.createHTTPClient();
         xhr.open('POST', talky.service.sendReplyURL(), true);
         xhr.setRequestHeader("Content-type", "application/json");
@@ -299,9 +351,9 @@
                 return;
             }
 
-            if (callbacks.onReplySuccess && typeof callbacks.onReplySuccess === 'function')
+            if (callbacks.onsuccess && typeof callbacks.onsuccess === 'function')
             {
-                callbacks.onReplySuccess(content);
+                callbacks.onsuccess(content);
             }
         };
 
@@ -311,6 +363,7 @@
 
         Ti.API.info('talky.service.sendReply, send = '+JSON.stringify(requestData));
         xhr.send(JSON.stringify(requestData));
+        */
     };
 
     talky.service.requestPostList = function(callbacks) {
@@ -323,7 +376,7 @@
         xhr.setRequestHeader("Content-type", "application/json");
 
         xhr.onload = function() {
-            //Ti.API.info('requestPostList:response = ' + xhr.responseText);
+            Ti.API.info('requestPostList:response = ' + xhr.responseText);
             var response = JSON.parse(xhr.responseText);
             if (!response.success) {
                 if (callbacks.onPostListUnavailable && typeof callbacks.onPostListUnavailable === 'function') {
@@ -332,6 +385,15 @@
                     alert(response.error);
                 }
             } else {
+
+                // Since the datetime format are different between client side(JS) and server side (Python)
+                // We have to do a convertion here.
+                for (var i=0;i<response.posts.length;i++) {
+                    response.posts[i].date_time = talky.utils.dateFromInterchangeable(response.posts[i].date_time);
+                }
+
+                talky.utils.sortPostListByDateTime(response.posts);
+
                 if (callbacks.onPostListAvailable && typeof callbacks.onPostListAvailable === 'function') {
                     callbacks.onPostListAvailable(response.posts);
 
@@ -346,7 +408,7 @@
             alert(e.error);
         };
 
-        //Ti.API.info('requestPostList:request = ' + JSON.stringify(requestData));
+        Ti.API.info('requestPostList:request = ' + JSON.stringify(requestData));
         xhr.send(JSON.stringify(requestData));
     };
 
@@ -393,6 +455,92 @@
         //Ti.API.info('talky.service.requestFBNameAndPhoto, fbUId = ' + fbUId);
     };
 
+    var pickPhotoFromGallery = function(callbacks) {
+
+        Ti.Media.openPhotoGallery({
+            success:function(e)
+            {
+                var image = e.media;
+                if (e.mediaType == Ti.Media.MEDIA_TYPE_PHOTO)
+                {
+                    Ti.API.info("1");
+                    if (callbacks.onPickPhotoSuccess && typeof callbacks.onPickPhotoSuccess === 'function')
+                    {
+                        Ti.API.info("2");
+                        callbacks.onPickPhotoSuccess(e.media);
+                    }
+
+                    //postContent(image, 'test');
+                }
+                else
+                {
+                    alert('MediaType is not a PHOTO!');
+                }
+            },
+            cancel:function(e)
+            {
+            
+            },
+            error:function(e)
+            {
+
+            },
+            allowEditing:true,
+            mediaTypes:[Ti.Media.MEDIA_TYPE_PHOTO],
+        });
+    };
+
+    /**
+     * callback = function(image)
+     *
+     */
+    talky.service.pickImageFromDevice = function(callback) {
+
+        var dialog = Ti.UI.createOptionDialog({
+            title:'是否拍照分享',
+            options:['確定', '取消'],
+            cancel:-1
+        });
+
+        dialog.addEventListener('click', function(e){
+            if (e.index === 0) {
+                //Ti.API.info('Enable sharing with photo');
+                Ti.App.Properties.setBool('share-with-photo', true);
+                Ti.Media.openPhotoGallery({
+                    success:function(e)
+                    {
+                        var image = e.media;
+                        if (e.mediaType == Ti.Media.MEDIA_TYPE_PHOTO)
+                        {
+                            if (callback && typeof callback === 'function')
+                            {
+                                callback(e.media);
+                            }
+                        }
+                        else
+                        {
+                            alert('MediaType is not a PHOTO!');
+                        }
+                    },
+                    cancel:function(e)
+                    {
+                    
+                    },
+                    error:function(e)
+                    {
+
+                    },
+                    allowEditing:true,
+                    mediaTypes:[Ti.Media.MEDIA_TYPE_PHOTO],
+                });
+            }
+            else if (e.index === 1) {
+                Ti.API.info('Disable sharing with photo');
+                Ti.App.Properties.setBool('share-with-photo', false);
+            }
+        });
+        dialog.show();
+    };
 
 })()
 

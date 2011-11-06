@@ -13,10 +13,21 @@ talky.app.osname = Titanium.Platform.osname;
 talky.app.version = Titanium.Platform.version;
 
 
+// test Date
+var rightNow = new Date();
+Ti.API.info('rightNow:getFullYear = ' + rightNow.getFullYear());
+Ti.API.info('rightNow:getMonth = ' + rightNow.getMonth());
+Ti.API.info('rightNow:getDate = ' + rightNow.getDate());
+Ti.API.info('rightNow:getHours = ' + rightNow.getHours());
+Ti.API.info('rightNow:getMinutes = ' + rightNow.getMinutes());
+Ti.API.info('rightNow:getSeconds = ' + rightNow.getSeconds());
+Ti.API.info('rightNow:getTimezoneOffset = ' + rightNow.getTimezoneOffset());
+Ti.API.info('rightNow:getUTCHours = ' + rightNow.getUTCHours());
+
+
 Ti.include('ui.js');
 Ti.include('service.js')
 Ti.include('data.js')
-//Ti.include('talky.js');
 
 
 talky.ui.appTabGroup.open();
