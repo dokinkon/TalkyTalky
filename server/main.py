@@ -18,6 +18,9 @@
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import util
 
+from google.appengine.api import users
+
+
 from google.appengine.ext import db  
 from django.utils import simplejson
 
@@ -346,7 +349,24 @@ class Get_spot(webapp.RequestHandler):
 
         self.response.headers['Content-Type'] = 'application/json; charset=utf-8'
         self.response.out.write(simplejson.dumps(response))
- 
+
+
+class Spot_admin(webapp.RequestHandler): 
+
+    def get(self):
+        
+        user = users.get_current_user()
+
+        if user:
+            output = 'Hey, you have signed in with %s' % user.email()
+            self.redirect('http://localhost:8084/admin.html')
+            #self.redirect('http://lets-talky-talky.appspot.com/admin.html')
+        else:
+            signin_url = users.create_login_url(self.request.path) 
+            output = 'You have not signed in et. Please <a href="%s"> Sign in</a>' % signin_url
+
+        self.response.out.write(output)
+
 
 class Record_spot(webapp.RequestHandler): 
 
@@ -358,14 +378,18 @@ class Record_spot(webapp.RequestHandler):
     127.0.0.1:8084/spot?name=rent-place&description=description&lat=25.000197&lon=121.520215
 
     """
-    def get(self):
-     
-        name = unicode(self.request.get('name'))
+    def post(self):
+        
+        logging.info(self.request.body)
+
+        request = simplejson.loads(self.request.body)
+ 
+        name = unicode(request['name'])
 
         logging.info(name)
-        description = self.request.get('description')
-        lat = float(self.request.get('lat'))
-        lon = float(self.request.get('lon'))
+        description = request['description']
+        lat = float(request['lat'])
+        lon = float(request['lon'])
         
         print name.encode('utf-8')
         print description
@@ -373,6 +397,7 @@ class Record_spot(webapp.RequestHandler):
         print lon
 
         new_spot = Spot.add(name=name,lat=lat, lon=lon, description=description)
+        
         self.response.out.write('done')
 
 
@@ -400,6 +425,7 @@ def main():
              ('/create-pic', CreateImageHandler), 
              ('/img', GetImageHandler),
              ('/spot',Record_spot),   
+             ('/admin',Spot_admin),   
              ('/q-spot',Query_spot),   
              ('/get-spot-list',Get_spot),
              ('/create-spot', CreateSpotHandler),

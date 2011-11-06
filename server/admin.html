@@ -1,0 +1,57 @@
+<html>
+    <head>
+        <script>
+        function sendLocation() {
+            var request = new XMLHttpRequest();
+            //var url = "http://127.0.0.1:8083/calc";
+            var url = "/spot";
+            //request.open('POST', url, true);
+            request.open('POST', url, true);
+
+            var query = {
+                name:document.getElementById("spot_name").value,
+                description:document.getElementById("spot_description").value,
+                lat:document.getElementById("latval").value,
+                lon:document.getElementById("longval").value
+            };
+
+
+            request.onreadystatechange = function() {
+                //document.getElementById("textarea").value = "JJ"
+                switch (request.readyState) {
+                    case 1:
+                        break;
+                    case 2:
+                        break;
+                    case 3:
+                        break;
+                    case 4:
+                        document.getElementById("aa").value = request.responseText;
+                        break;
+                }
+            }
+
+            request.send(JSON.stringify(query));
+        }
+        </script>
+    </head>
+    <body>
+        <div>
+            <form action="javascript:sendLocation();">
+                <div>Spot Name:<input name="spot name" type="text" id="spot_name" size="30"/><br />
+                <br />
+                Spot Description:<input name="spot description" type="text" id="spot_description" size="30"/><br />
+                <br />
+                Latitude:  <input name="latitude" type="text" id="latval" size="30"/><br />
+                <br />
+                Longitude:  <input name="longitude" type="text" id="longval" size="30"/><br />
+                <br />
+                <input type="submit" value="send"/><br /></div>
+            </form>
+        </div>
+
+        <div>
+            <textarea rows="20" cols="30" id="aa"></textarea>
+        </div>
+    </body>
+</html>

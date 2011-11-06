@@ -4,6 +4,11 @@ runtime: python
 api_version: 1
 
 handlers:
+
+- url: /admin\.html
+  #script: admin.html
+  static_files: admin.html
+  upload: admin.html
 - url: .*
   script: main.py
 
